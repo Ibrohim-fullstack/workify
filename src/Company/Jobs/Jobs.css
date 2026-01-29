@@ -1,0 +1,522 @@
+/* Jobs.css - Rasmdagi dizaynga mos */
+
+.jobs-container {
+    min-height: 100vh;
+    background-color: #f9fafb;
+    padding: 30px 20px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+}
+
+/* Loading va error */
+.jobs-loading,
+.jobs-error,
+.no-jobs {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    text-align: center;
+}
+
+.jobs-loading p {
+    font-size: 20px;
+    color: #163D5C;
+    font-weight: 500;
+}
+
+.jobs-error p {
+    font-size: 20px;
+    color: #dc2626;
+    font-weight: 500;
+}
+
+/* Sarlavha - rasmdagi kabi */
+.jobs-header {
+    max-width: 1000px;
+    margin: 0 auto 10px;
+}
+
+.header-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+
+.header-title {
+    font-size: 36px;
+    font-weight: 700;
+    color: #000;
+    margin: 0;
+}
+
+.header-count {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+}
+
+.count-number {
+    width: 150px;
+    font-size: 24px;
+    font-weight: 600;
+    font-family: sans-serif;
+    position: relative;
+    right: 75px;
+}
+
+.count-label {
+    font-size: 16px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* Jobs list */
+.jobs-list {
+    max-width: 1150px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.job-card {
+    width: 100%;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e0e0e0;
+    overflow: hidden;
+    transition: box-shadow 0.3s ease;
+    position: relative;
+}
+
+.job-card:hover {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+}
+
+.card-content {
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ========== Kompaniya sarlavhasi - yangi dizayn ========== */
+.company-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 20px;
+}
+
+/* Chap tomondagi kompaniya ma'lumotlari */
+.company-left {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex: 1;
+}
+
+.company-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background-color: #EEF2F8;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: bold;
+    color: #163D5C;
+}
+
+.company-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.company-name {
+    font-family: Gilroy;
+    font-weight: 700;
+    font-size: 20px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    font-family: sans-serif;
+    color: #343C44;
+    margin-bottom: 4px;
+}
+
+.company-type {
+    font-size: 16px;
+    color: #666;
+    margin: 0 0 8px 0;
+    font-weight: 500;
+}
+
+.company-rating {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+.stars {
+    display: flex;
+    gap: 2px;
+}
+
+.star {
+    font-size: 18px;
+    color: #ffd700;
+}
+
+.rating-number {
+    font-size: 14px;
+    font-weight: 600;
+    color: #000;
+    margin-right: 8px;
+}
+
+.reviews {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+/* O'ng tomondagi ma'lumotlar - lokatsiya, vaqt */
+.company-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.job-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+}
+
+.meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    color: #666;
+}
+
+.meta-icon {
+    font-size: 16px;
+}
+
+/* Divider */
+.divider {
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 20px 0;
+    border: none;
+}
+
+/* Ish nomi va maosh */
+.job-title-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.job-title {
+    font-size: 24px;
+    font-weight: 700;
+    color: #343C44;
+    margin: 0;
+}
+
+.job-salary {
+    font-size: 24px;
+    font-weight: 700;
+    color: #343C44;
+}
+
+/* Tavsif */
+.job-description {
+    margin-bottom: 20px;
+}
+
+.job-description p {
+    font-size: 15px;
+    line-height: 1.5;
+    color: #444;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+/* ========== Pastgi qism - Required skills va tugmalar ========== */
+.job-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    margin-top: 20px;
+    padding-top: 20px;
+}
+
+/* Required skills - pastgi chap burchakda */
+.job-skills {
+    flex: 1;
+    margin-bottom: 0;
+}
+
+.skills-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #343C44;
+    margin: 0 0 12px 0;
+}
+
+.skills-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.skill-item {
+    color: #444;
+    font-size: 13px;
+    font-weight: 500;
+    background-color: #EEF2F8;
+    text-decoration: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    white-space: nowrap;
+}
+
+/* Tugmalar - pastgi o'ng burchakda, yonma-yon */
+.job-buttons {
+    display: flex;
+    gap: 12px;
+    margin-left: 20px;
+}
+
+.btn-quick-apply {
+    background: #163D5C;
+    color: white;
+    width: 150px;
+    height: 40px;
+    border-radius: 6px;
+    border: none;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-quick-apply:hover {
+    background: #336086;
+}
+
+.btn-view-job {
+    background: transparent;
+    color: #163D5C;
+    border: 1px solid #163D5C;
+    width: 150px;
+    height: 40px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.hrr{
+    max-width: 1104px;
+    margin-left: 188px;
+    position: relative;
+    bottom: 30px;
+    color: #444;
+}
+
+.btn-view-job:hover {
+    background: #336086;
+    color: white;
+}
+
+/* No jobs */
+.no-jobs {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.no-jobs p {
+    font-size: 18px;
+    color: #666;
+    margin: 0;
+    font-weight: 500;
+}
+
+/* ========== Responsive design ========== */
+@media (max-width: 768px) {
+    .jobs-container {
+        padding: 24px 16px;
+    }
+
+    .header-main {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .header-count {
+        align-items: flex-start;
+    }
+
+    .header-title {
+        font-size: 32px;
+    }
+
+    .jobs-list {
+        padding: 0;
+    }
+
+    .card-content {
+        padding: 20px;
+        min-height: auto;
+    }
+
+    .company-header {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .company-left {
+        width: 100%;
+    }
+
+    .company-right {
+        align-items: flex-start;
+        width: 100%;
+    }
+
+    .job-meta {
+        align-items: flex-start;
+    }
+
+    .job-title-section {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .job-salary {
+        font-size: 20px;
+    }
+
+    .job-title {
+        font-size: 20px;
+    }
+
+    .company-name {
+        font-size: 18px;
+    }
+
+    /* Mobil uchun footer */
+    .job-footer {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 20px;
+    }
+
+    .job-buttons {
+        margin-left: 0;
+        justify-content: flex-end;
+        width: 100%;
+    }
+
+    .btn-quick-apply,
+    .btn-view-job {
+        width: 180px;
+        height: 48px;
+    }
+}
+
+@media (max-width: 480px) {
+    .job-buttons {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .btn-quick-apply,
+    .btn-view-job {
+        width: 100%;
+        height: 48px;
+    }
+
+    .skills-list {
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .skill-item {
+        width: fit-content;
+    }
+}
+
+.location-item {
+    font-family: sans-serif;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #56657F;
+}
+
+
+.created-item {
+    font-family: sans-serif;
+    font-weight: 500;
+    font-style: SemiBold;
+    font-size: 18px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: #56657F;
+    margin-top: 3px;
+}
+
+.hiri {
+    padding: 7px 20px;
+    top: 297px;
+    left: 1366px;
+    opacity: 1;
+    border-radius: 10px;
+    background-color: #50C594;
+    font-family: sans-serif;
+    font-weight: 700;
+    font-style: Bold;
+    font-size: 16px;
+    line-height: 100%;
+    letter-spacing: 0%;
+    color: white;
+    margin-top: 5px;
+}
+
+
+.hiri:hover{
+    background-color: #02b14b;
+    transform: scale(1.1);
+    transition: 0.3s;
+}

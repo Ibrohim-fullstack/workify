@@ -1,0 +1,217 @@
+.home-ibrohim {
+    width: 100%;
+    height: 1800px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+    background-color: #FFFFFF;
+}
+
+.home-ibrohim section {
+    width: 100%;
+    height: 1052px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.home-ibrohim section .container1 {
+    width: 1470px;
+    height: 582px;
+    display: flex;
+    align-items: center;
+    background-image: url("../assets/bgImg.png");
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+}
+
+.home-ibrohim section .container1 .main-content-container {
+    width: 1000px;
+    height: 350px;
+    display: flex;
+    justify-content: space-between;
+    flex-direction: column;
+    margin-left: 100px;
+}
+
+.home-ibrohim section .container1 .main-content-container .text {
+    width: 543px;
+    height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-direction: column;
+}
+
+.home-ibrohim section .container1 .main-content-container .text .p1 {
+    font-size: 50px;
+    color: #343C44;
+    font-weight: 600;
+    line-height: 55px;
+}
+
+.home-ibrohim section .container1 .main-content-container .text .p2 {
+    font-size: 20px;
+    color: #343C44;
+    font-weight: 400;
+}
+
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper {
+    width: 1000px;
+    height: 96px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .label1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #343C44;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .label2 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #343C44;
+    padding-left: 300px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box {
+    width: 1000px;
+    height: 68px;
+    background: #FFFFFF;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-radius: 20px;
+    box-shadow: 0 12px 25px rgba(0, 0, 0, 0.12);
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .input1 {
+    width: 215px;
+    height: 18px;
+    margin-left: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .input2 {
+    width: 250px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-right: 60px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .icon {
+    font-size: 20px;
+    color: #C2C2C2;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .input1 input {
+    width: 185px;
+    height: 18px;
+    border: none;
+    outline: none;
+    color: #163D5C;
+    font-size: 16px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .input2 input {
+    width: 220px;
+    height: 18px;
+    border: none;
+    outline: none;
+    color: #163D5C;
+    font-size: 16px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .input1 input::placeholder {
+    font-size: 16px;
+    color: #C2C2C2;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-box .input2 input::placeholder {
+    font-size: 16px;
+    color: #C2C2C2;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .home-hr {
+    width: 2px;
+    height: 100%;
+    background-color: #C7C7C780;
+    margin-left: 100px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-btn {
+    width: 200px;
+    height: 60px;
+    border-radius: 20px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #FFFFFF;
+    background-color: #163D5C;
+    cursor: pointer;
+    margin-right: 3px;
+}
+
+.home-ibrohim section .container1 .main-content-container .search-wrapper .search-btn:hover {
+    border: 2px solid #163D5C;
+    color: #163D5C;
+    background: #FFFFFF;
+}
+
+
+.home-ibrohim section .container2 {
+    width: 1128px;
+    height: 347px;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+.home-ibrohim section .container2 .box {
+    width: 210px;
+    height: 200px;
+    display: flex;
+    flex-direction: column;
+    margin-top: 80px;
+    cursor: pointer;
+}
+
+.home-ibrohim section .container2 .box .p1 {
+    font-size: 20px;
+    color: #343C44;
+    font-weight: 400;
+    padding-top: 10px;
+}
+
+.home-ibrohim section .container2 .box .p2 {
+    font-size: 16px;
+    color: #AAAAAA;
+    font-weight: 400;
+    padding-top: 10px;
+}
+
+.home-ibrohim section .container2 .box .box-icon {
+    color: #C2C2C2;
+    font-size: 35px;
+}
+
+/* Box Hover */
+
+.home-ibrohim section .container2 .box .p1:hover {
+    color: #AAAAAA;
+}
+
+.home-ibrohim section .container2 .box .p2:hover {
+    color: #343C44;
+}
+
+.home-ibrohim section .container2 .box .box-icon:hover {
+    color: #343C44;
+}
