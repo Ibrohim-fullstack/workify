@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import './Jobs.css';
+import { Link } from 'react-router-dom';
+import { jobApi } from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
 
 function Jobs() {
@@ -11,308 +12,162 @@ function Jobs() {
         const fetchJobs = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('https://workifybackend-production.up.railway.app/api/jobs');
-
-                if (!response.ok) {
-                    throw new Error(`Server xatosi: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                if (!data || data.length === 0) {
-                    setJobs(getMockJobs());
-                } else {
-                    const formattedData = data.map(job => formatJobData(job));
-                    setJobs(formattedData);
-                }
+                const response = await jobApi.getAll();
+                setJobs(response.data || []);
             } catch (err) {
-                console.error('Fetch xatosi:', err);
-                setError(err.message);
-                setJobs(getMockJobs());
+                console.error('Fetch error:', err);
+                setError("Ma'lumotlarni yuklashda xatolik yuz berdi");
             } finally {
                 setLoading(false);
             }
         };
-
         fetchJobs();
     }, []);
 
     const formatDate = (dateString) => {
         try {
-            const date = new Date(dateString);
-            return formatDistanceToNow(date, { addSuffix: true });
-        } catch (e) {
-            return 'recently';
-        }
+            if (!dateString) return 'recently';
+            return formatDistanceToNow(new Date(dateString), { addSuffix: true });
+        } catch (e) { return 'recently'; }
     };
 
-    const getCompanyLogo = (companyName) => {
-        if (!companyName) return 'TC';
-
-        const words = companyName.split(' ');
-        if (words.length >= 2) {
-            return `${words[0].charAt(0)}${words[1].charAt(0)}`.toUpperCase();
+    const parseSkills = (skillsData) => {
+        if (!skillsData) return [];
+        if (typeof skillsData === 'string') {
+            return skillsData.split(',').map(s => s.trim()).filter(s => s !== "");
         }
-        return companyName.substring(0, 2).toUpperCase();
-    };
-
-    const parseSkills = (skillsString) => {
-        if (!skillsString) return [];
-
-        if (typeof skillsString === 'string') {
-            return skillsString.split(',').map(skill => skill.trim());
-        }
-
-        if (Array.isArray(skillsString)) {
-            return skillsString;
-        }
-
+        if (Array.isArray(skillsData)) return skillsData;
         return [];
     };
 
-    const formatJobData = (apiJob) => {
-        let companyName = "TechCells";
-        if (apiJob.company && apiJob.company.company_name) {
-            companyName = apiJob.company.company_name;
-        }
-
-        let companyType = "Computer Software";
-        if (apiJob.company && apiJob.company.industry) {
-            companyType = apiJob.company.industry;
-        }
-
-        const rating = 4.0;
-        const reviews = "1K";
-
-        let jobTitle = "UX/UI Designer";
-        if (apiJob.occupation) {
-            jobTitle = apiJob.occupation;
-        }
-
-        let salaryRange = "$400-1,000";
-        if (apiJob.salary_min !== undefined && apiJob.salary_max !== undefined) {
-            salaryRange = `$${apiJob.salary_min}-${apiJob.salary_max}`;
-        }
-
-        let description = "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout.";
-        if (apiJob.description) {
-            description = apiJob.description;
-        }
-
-        // Skills - API dan kelgan skills ni ishlatamiz
-        let skills = parseSkills(apiJob.skills);
-
-        // Agar skills bo'sh bo'lsa, specialty ni ishlatamiz
-        if (skills.length === 0 && apiJob.specialty) {
-            skills = [apiJob.specialty];
-        }
-
-        // Agar hali ham bo'sh bo'lsa, default skills
-        if (skills.length === 0) {
-            skills = [
-                "Figma (2 years)",
-                "Adobe Photoshop (1 year)",
-                "Responsive UX/UI (6 years)",
-                "Adobe XD (1 year)"
-            ];
-        }
-
-        let location = 'Tashkent, Uzbekistan';
-        if (apiJob.location) {
-            location = apiJob.location;
-        } else if (apiJob.company && apiJob.company.city) {
-            location = `${apiJob.company.city}, ${apiJob.company.country || 'Uzbekistan'}`;
-        }
-
-        let jobType = 'Full-time';
-        if (apiJob.job_type) {
-            jobType = apiJob.job_type;
-        }
-
-        let createdAt = 'recently';
-        if (apiJob.createdAt) {
-            createdAt = formatDate(apiJob.createdAt);
-        }
-
-        return {
-            id: apiJob.id || Date.now().toString(),
-            companyName,
-            companyType,
-            rating,
-            reviews,
-            jobTitle,
-            salaryRange,
-            description: description.length > 150 ? description.substring(0, 150) + '...' : description,
-            skills,
-            location,
-            jobType,
-            createdAt,
-            workplaceType: apiJob.workplace_type || 'Office',
-            specialty: apiJob.specialty || 'Software Development'
-        };
-    };
-
-    // const getMockJobs = () => {
-    //     return [
-    //         {
-    //             id: '1',
-    //             companyName: 'LeverX',
-    //             companyType: 'Software',
-    //             rating: 4.0,
-    //             reviews: '1K',
-    //             jobTitle: 'Backend Developer',
-    //             salaryRange: '$500-1,200',
-    //             description: 'We are looking for a skilled backend developer',
-    //             skills: ["Node.js", "SQL", "MongoDB", "Express.js", "REST API", "Git", "Docker", "AWS"],
-    //             location: 'Tashkent, Uzbekistan',
-    //             jobType: 'Full-time',
-    //             createdAt: '2 days ago',
-    //             workplaceType: 'Remote',
-    //             specialty: 'Node.js'
-    //         },
-    //         {
-    //             id: '2',
-    //             companyName: 'ITpark',
-    //             companyType: 'Technology',
-    //             rating: 4.2,
-    //             reviews: '2.5K',
-    //             jobTitle: 'Frontend Developer',
-    //             salaryRange: '$600-1,500',
-    //             description: 'We are looking for an experienced frontend developer with React skills',
-    //             skills: ["React", "JavaScript", "TypeScript", "CSS", "HTML5", "Redux", "Webpack", "SASS", "Bootstrap"],
-    //             location: 'Namangan, Uzbekistan',
-    //             jobType: 'Full-time',
-    //             createdAt: '1 week ago',
-    //             workplaceType: 'Office',
-    //             specialty: 'React.js'
-    //         }
-    //     ];
-    // };
-
-    const renderStars = (rating) => {
-        const stars = [];
-        const fullStars = Math.floor(rating);
-
-        for (let i = 0; i < 5; i++) {
-            if (i < fullStars) {
-                stars.push(<span key={i} className="star">★</span>);
-            } else {
-                stars.push(<span key={i} className="star">☆</span>);
-            }
-        }
-
-        return stars;
-    };
-
-    if (loading) {
-        return (
-            <div className="jobs-container">
-                <div className="jobs-loading">
-                    <p>Yuklanmoqda...</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <div className="flex justify-center items-center min-h-screen text-gray-500 font-medium">Yuklanmoqda...</div>;
+    if (error) return <div className="flex justify-center items-center min-h-screen text-red-500 font-medium">{error}</div>;
 
     return (
-        <div className="jobs-container">
-            <div className="jobs-header">
-                <div className="header-main">
-                    <div className="header-count">
-                        <span className="count-number">{jobs.length}. jobs</span>
+        <div className="bg-[#fcfcfc] min-h-screen p-4 md:p-8 font-sans">
+            <div className="max-w-6xl mx-auto">
+
+                {/* HEADER */}
+                <div className="mb-6">
+                    <div className="flex items-baseline gap-2 pb-3">
+                        <span className="text-[20px] md:text-[25px] font-medium text-[#404040] tracking-tight">
+                            {new Intl.NumberFormat('de-DE').format(jobs.length)}
+                        </span>
+                        <span className="text-[20px] md:text-[25px] font-medium text-[#404040] lowercase tracking-tight">jobs</span>
                     </div>
+                    <div className="h-[1.5px] w-full bg-[#e5e7eb]"></div>
                 </div>
-            </div>
 
-            <hr className='hrr'/>
+                {/* JOBS LIST */}
+                <div className="space-y-5">
+                    {jobs.map((job) => {
+                        const skills = parseSkills(job.skils);
+                        const company = job.company || {};
 
-            <div className="jobs-list">
-                {jobs.length > 0 ? (
-                    jobs.map((job) => (
-                        <div key={job.id} className="job-card">
-                            <div className="card-content">
-                                {/* Kompaniya sarlavhasi */}
-                                <div className="company-header">
-                                    <div className="company-left">
-                                        <div className="company-logo">
-                                            {getCompanyLogo(job.companyName)}
-                                        </div>
-                                        <div className="company-details">
-                                            <h2 className="company-name">{job.companyName}</h2>
-                                            <p className="company-type">{job.companyType}</p>
-                                            <div className="company-rating">
-                                                <div className="stars">{renderStars(job.rating)}</div>
-                                                <span className="rating-number">({job.rating.toFixed(1)})</span>
-                                                <span className="reviews">{job.reviews} reviews</span>
+                        return (
+                            <div key={job.id} className="bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+
+                                {/* 1. TOP SECTION */}
+                                <div className="p-5 md:p-8">
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                                        <div className="flex items-center gap-4 md:gap-5">
+                                            {/* Logo */}
+                                            <div className="w-12 h-12 md:w-16 md:h-16 bg-[#00A193] rounded-full flex items-center justify-center overflow-hidden shrink-0">
+                                                {company.profileimg_url ? (
+                                                    <img src={company.profileimg_url} alt="logo" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <span className="text-white text-xl md:text-2xl font-bold">
+                                                        {company.company_name?.substring(0, 2).toUpperCase() || 'TC'}
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            {/* Company details */}
+                                            <div>
+                                                <h3 className="text-lg md:text-2xl font-bold text-[#3a3a3a] leading-tight">
+                                                    {company.company_name || 'TechCells'}
+                                                </h3>
+                                                <p className="text-gray-700 text-[18px] md:text-[26px] font-sans font-[400]">
+                                                    {company.industry || 'Computer Software'}
+                                                </p>
+                                                <div className="flex items-center gap-1 mt-1">
+                                                    <div className="flex text-yellow-400 text-[20px] md:text-[30px] tracking-tighter transform md:-translate-y-3 -translate-y-1">★★★★<span className="text-gray-300">★</span></div>
+                                                    <span className="text-gray-500 text-[12px] md:text-[15px] font-semibold ml-1 transform md:-translate-y-2 -translate-y-0.5">(4.0) 1K reviews</span>
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    {/* O'ng tomondagi ma'lumotlar - faqat lokatsiya, vaqt, workplace type */}
-                                    <div className="company-right">
-                                        <div className="job-meta">
-                                            <div className="meta-item location-item">
-                                                <span className="meta-icon"></span>
-                                                <span>{job.location}</span>
+                                        {/* Meta data */}
+                                        <div className="flex flex-row md:flex-col justify-between md:items-end items-center gap-1.5 w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
+                                            <div className="flex items-center text-[#4b5563] text-sm md:text-lg font-semibold">
+                                                <svg className="w-4 h-4 mr-1 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                </svg>
+                                                {job.location || 'Tashkent'}
                                             </div>
-                                            <div className="meta-item created-item">
-                                                <span className="meta-icon"></span>
-                                                <span>{job.createdAt}</span>
-                                            </div>
-                                            <div className="meta-item">
-                                                <span className="meta-icon"></span>
-                                                <button className='hiri'>Now hiring</button>
+                                            <div className="flex flex-col md:items-end items-start">
+                                                <span className="text-gray-600 text-[14px] md:text-[20px] font-medium">{formatDate(job.createdAt)}</span>
+                                                <span className="mt-1 bg-[#52D195] text-white text-[9px] md:text-[11px] font-black px-2 md:px-2.5 py-1 md:py-2.5 rounded-lg md:rounded-xl uppercase tracking-widest mt-4">
+                                                    Now hiring
+                                                </span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="divider"></div>
+                                <div className="border-t border-gray-100 mx-6"></div>
 
-                                <div className="job-title-section">
-                                    <h3 className="job-title">{job.jobTitle}</h3>
-                                    <div className="job-salary">{job.salaryRange}</div>
-                                </div>
-
-                                <div className="job-description">
-                                    <p>{job.description}</p>
-                                </div>
-
-                                <div className="job-footer">
-                                    {/* Required skills - pastgi chap burchakda */}
-                                    <div className="job-skills">
-                                        <h4 className="skills-title">Required skills:</h4>
-                                        <ul className="skills-list">
-                                            {job.skills && job.skills.map((skill, index) => (
-                                                <li key={index} className="skill-item">{skill}</li>
-                                            ))}
-                                        </ul>
+                                {/* 2. MIDDLE SECTION */}
+                                <div className="p-5 md:p-6">
+                                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
+                                        <h2 className="text-[18px] md:text-[22px] font-bold text-[#515151] tracking-tight">
+                                            {job.occupation || 'Job Title'}
+                                        </h2>
+                                        <div className="text-[20px] md:text-[25px] font-bold text-[#343434] tracking-tight">
+                                            ${job.salary_min}-{job.salary_max}
+                                        </div>
                                     </div>
+                                    <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
+                                        {job.description || "Ma'lumot berilmagan."}
+                                    </p>
+                                </div>
 
-                                    {/* Tugmalar - pastgi o'ng burchakda, yonma-yon */}
-                                    <div className="job-buttons">
-                                        <button
-                                            className="btn-quick-apply"
-                                            onClick={() => console.log('Quick apply:', job.id)}
-                                        >
-                                            Quick apply
-                                        </button>
-                                        <button
-                                            className="btn-view-job"
-                                            onClick={() => console.log('View job:', job.id)}
-                                        >
-                                            View job post
-                                        </button>
+                                {/* 3. BOTTOM SECTION */}
+                                <div className="p-5 md:p-6 pt-0">
+                                    <div className="flex flex-col md:flex-row justify-between items-stretch md:items-end gap-6">
+                                        <div className="w-full">
+                                            <h4 className="text-[#1a1a1a] text-[13px] md:text-[14px] font-bold mb-3">Required skills:</h4>
+                                            <div className="flex flex-wrap gap-2">
+                                                {skills.length > 0 ? (
+                                                    skills.map((skill, idx) => (
+                                                        <span key={idx} className="px-3 py-1.5 md:px-4 md:py-2 bg-[#f1f5f9] text-[#475569] text-[12px] md:text-[14px] font-semibold rounded-lg border border-slate-100">
+                                                            {skill}
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-gray-400 text-sm italic">Skills not listed</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Action buttons */}
+                                        <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+                                            <button className="w-full sm:w-auto px-6 md:px-[60px] py-3 md:py-[15px] bg-[#1D3D54] text-white text-[16px] md:text-[20px] font-[650] rounded-lg hover:bg-[#152c3d] transition-all shadow-sm">
+                                                Quick apply
+                                            </button>
+                                            <Link
+                                                to={`/jobs/${job.id}`}
+                                                className="w-full sm:w-auto px-6 md:px-[30px] py-3 md:py-[15px] border-2 border-[#1D3D54] text-[#1D3D54] text-[16px] md:text-[20px] font-[650] rounded-lg hover:bg-slate-50 transition-all text-center whitespace-nowrap"
+                                            >
+                                                View job post
+                                            </Link>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className="no-jobs">
-                        <p>Hozircha ishlar mavjud emas...</p>
-                    </div>
-                )}
+                        );
+                    })}
+                </div>
             </div>
         </div>
     );
