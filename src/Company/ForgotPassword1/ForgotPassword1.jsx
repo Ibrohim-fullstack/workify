@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { sendResetCode } from "../../services/api";
-import './ForgotPassword1.css';
 
 const ForgotPassword1 = () => {
     const [email, setEmail] = useState('');
@@ -24,35 +23,42 @@ const ForgotPassword1 = () => {
     };
 
     return (
-        <div className="forgot-password-container">
-            <div className="forgot-password-content">
-                <h1 className="forgot-password-title">
+        <div className="flex flex-col items-center justify-center min-h-[80vh] bg-white font-sans p-4">
+            <div className="w-full max-w-[500px] px-6">
+
+                {/* TITLE - Media: telefonda kichikroq, md ekranda 36px */}
+                <h1 className="text-[28px] md:text-[36px] font-bold color-[#1e3a5a] text-[#1e3a5a] text-center mb-10 tracking-tight">
                     Reset your password
                 </h1>
 
-                <form onSubmit={handleNext} className="forgot-password-form">
-                    <div className="input-container">
-                        <span className="input-icon">
+                <form onSubmit={handleNext} className="flex flex-col items-center">
+
+                    {/* INPUT CONTAINER */}
+                    <div className="relative w-full mb-8">
+                        <span className="absolute inset-y-0 left-0 flex items-center pl-4 text-gray-400">
                             <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-                                <rect width="20" height="16" x="2" y="4" rx="2" /><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+                                <rect width="20" height="16" x="2" y="4" rx="2" />
+                                <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                             </svg>
                         </span>
                         <input
                             type="email"
                             placeholder="Email"
                             required
-                            className="email-input"
+                            className="w-full pl-12 pr-4 py-4 border border-gray-300 rounded-[10px] text-[18px] shadow-sm focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-transparent placeholder-gray-400 transition-all"
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                         />
                     </div>
 
-                    {error && <p className="error-message">{error}</p>}
+                    {/* ERROR MESSAGE */}
+                    {error && <p className="text-red-500 text-sm mb-4 self-start pl-1">{error}</p>}
 
+                    {/* SUBMIT BUTTON - Media: telefonda sal kengroq, md'da 180px */}
                     <button
                         type="submit"
                         disabled={loading}
-                        className="submit-button"
+                        className="w-full md:w-[180px] bg-[#1e3a5a] text-white py-3 rounded-[10px] font-bold text-[18px] shadow-md hover:bg-[#152c45] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100 transition-all"
                     >
                         {loading ? "..." : "Next"}
                     </button>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import './Talent.css';
+import { talentApi } from '../../services/api';
 
 function Talents() {
     const [talents, setTalents] = useState([]);
@@ -11,259 +11,158 @@ function Talents() {
         const fetchTalents = async () => {
             try {
                 setLoading(true);
-                const response = await fetch('https://workifybackend-production.up.railway.app/api/talent');
-
-                if (!response.ok) {
-                    throw new Error(`Server xatosi: ${response.status}`);
-                }
-
-                const data = await response.json();
-
-                // Normalize qilish
-                const normalizedData = data.map(talent => normalizeTalentData(talent));
-                setTalents(normalizedData);
+                const response = await talentApi.getAll();
+                setTalents(response.data || []);
             } catch (err) {
-                console.error('Fetch xatosi:', err);
-                setError(err.message);
-
-                // Mock ma'lumotlar
-                setTalents(getMockTalents());
+                console.error('API Error:', err);
+                setError("Ma'lumotlarni yuklashda xatolik yuz berdi");
             } finally {
                 setLoading(false);
             }
         };
-
         fetchTalents();
     }, []);
 
-    // API ma'lumotlarini normalize qilish
-    const normalizeTalentData = (talent) => {
-        // ID
-        const id = talent.id;
-
-        // Ism va familiya
-        const firstName = talent.first_name || talent.firstName || '';
-        const lastName = talent.last_name || talent.lastName || '';
-
-        // Kasb/Role - rasmda "Designer" ko'rinadi
-        let role = '';
-        if (talent.specialty) {
-            role = talent.specialty;
-        } else if (talent.occupation) {
-            role = talent.occupation;
-        } else {
-            role = 'Designer'; // Default qilib "Designer" qo'ydim
-        }
-
-        // Shahar va mamlakat
-        let city = '';
-        if (talent.city && talent.country) {
-            city = `${talent.city}, ${talent.country}`;
-        } else if (talent.city) {
-            city = talent.city;
-        } else if (talent.location) {
-            city = talent.location;
-        } else if (talent.country) {
-            city = talent.country;
-        } else {
-            city = 'Noma\'lum';
-        }
-
-        // Narx - minimum_salary maydoni bor
-        const price = talent.minimum_salary || 1250;
-
-        // Tavsif - about maydoni
-        const description = talent.about ||
-            "fact that a reader will be distracted by the readable content of a page when lo-sum is that it has a more-or-less normal distribution of letters, as opposed to usi";
-
-        // Skills - skils maydoni JSON string formatda
-        let skills = [];
-        if (talent.skils) {
-            try {
-                // JSON stringini parse qilish
-                const parsedSkills = JSON.parse(talent.skils);
-                if (Array.isArray(parsedSkills)) {
-                    skills = parsedSkills.map(item => {
-                        if (item.skill && item.experience_years) {
-                            return `${item.skill} (${item.experience_years} year${item.experience_years > 1 ? 's' : ''})`;
-                        }
-                        return item.skill || item;
-                    }).filter(skill => skill);
-                }
-            } catch (e) {
-                console.error('Skills parse qilishda xato:', e);
-                // Agar parse qilishda xato bo'lsa, default skills
-                skills = ["be Photoshop (1 year)", "Adobe Photoshop (1 year)", "Adobe XD (1 year)"];
-            }
-        }
-
-        // Agar skills bo'sh bo'lsa, default qo'yish
-        if (skills.length === 0) {
-            skills = ["be Photoshop (1 year)", "Adobe Photoshop (1 year)", "Adobe XD (1 year)"];
-        }
-
-        // Rasm
-        const image = talent.image;
-
-        return {
-            id,
-            firstName,
-            lastName,
-            role,
-            city,
-            price,
-            description,
-            skills,
-            image
-        };
+    const formatCount = (count) => {
+        return new Intl.NumberFormat('de-DE').format(count);
     };
 
-    // Mock ma'lumotlar - rasmdagiga o'xshash
-    // const getMockTalents = () => {
-    //     return [
-    //         {
-    //             id: 1,
-    //             firstName: "",
-    //             lastName: "Ibrokhimov",
-    //             role: "Designer",
-    //             city: "Tashkent, Uzbekistan",
-    //             price: 1250,
-    //             description: "fact that a reader will be distracted by the readable content of a page when lo-sum is that it has a more-or-less normal distribution of letters, as opposed to usi",
-    //             skills: ["be Photoshop (1 year)", "Adobe Photoshop (1 year)", "Adobe XD (1 year)"],
-    //             image: null
-    //         }
-    //     ];
-    // };
-
-    // Format number with dots as thousand separators (1.250.00)
     const formatPrice = (price) => {
-        if (!price && price !== 0) return '$0.00';
-
-        const priceStr = price.toString();
-        const parts = priceStr.split('.');
-        const whole = parts[0];
-        const decimal = parts[1] || '00';
-
-        const formattedWhole = whole.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-        const formattedDecimal = decimal.padEnd(2, '0').slice(0, 2);
-
-        return `$${formattedWhole}.${formattedDecimal}`;
+        const value = price || 0;
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'USD',
+            minimumFractionDigits: 2,
+        }).format(value);
     };
 
-    // Format talent count with dots (1.256)
-    const formatTalentCount = (count) => {
-        return count.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    const parseSkills = (skillsStr) => {
+        try {
+            if (!skillsStr) return [];
+            const parsed = JSON.parse(skillsStr);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
     };
 
-    if (loading) {
-        return (
-            <div className="talents-container">
-                <div className="talents-loading">
-                    <p>Yuklanmoqda...</p>
-                </div>
-            </div>
-        );
-    }
-
-    if (error && talents.length === 0) {
-        return (
-            <div className="talents-container">
-                <div className="talents-error">
-                    <p>Xato: {error}</p>
-                </div>
-            </div>
-        );
-    }
+    if (loading) return <div className="flex justify-center items-center min-h-screen text-gray-500 font-medium">Yuklanmoqda...</div>;
+    if (error) return <div className="flex justify-center items-center min-h-screen text-red-500 font-medium">{error}</div>;
 
     return (
-        <div className="talents-container">
-            <div className="talents-header">
-                <div className="header-main">
-                    <div className="header-count">{formatTalentCount(talents.length)}.</div>
-                    <h1 className="header-title"><span className="talent-text">talents</span></h1>
+        <div className="bg-[#fcfcfc] min-h-screen p-4 md:p-8 font-sans">
+            <div className="max-w-6xl mx-auto">
+
+                {/* HEADER QISMI */}
+                <div className="mb-6">
+                    <div className="flex items-baseline gap-2 pb-3">
+                        <span className="text-[20px] md:text-[25px] font-medium text-[#404040] tracking-tight">
+                            {formatCount(talents.length)}
+                        </span>
+                        <span className="text-[20px] md:text-[25px] font-medium text-[#404040] lowercase tracking-tight">
+                            talents
+                        </span>
+                    </div>
+                    <div className="h-[1.5px] w-full bg-[#e5e7eb]"></div>
                 </div>
-            </div>
-            <hr className='hr' />
-            <div className="talents-list">
-                {talents.length > 0 ? (
-                    talents.map((talent) => (
-                        <div key={talent.id} className="talent-card">
-                            <div className="card-content">
-                                {/* Avatar va ism bir qatorda */}
-                                <div className="top-section">
-                                    <div className="talent-avatar">
-                                        {talent.image ? (
-                                            <img
-                                                src={talent.image}
-                                                alt={`${talent.firstName} ${talent.lastName}`}
-                                                className="avatar-image"
-                                                onError={(e) => {
-                                                    e.target.style.display = 'none';
-                                                    e.target.parentElement.innerHTML =
-                                                        `<div class="avatar-initials">
-                                ${talent.firstName[0] || ''}${talent.lastName[0] || ''}
-                            </div>`;
-                                                }}
-                                            />
-                                        ) : (
-                                            <div className="avatar-initials">
-                                                {talent.firstName[0] || ''}{talent.lastName[0] || ''}
+
+                {/* TALENTLAR RO'YXATI */}
+                <div className="space-y-5">
+                    {talents.map((talent) => {
+                        const skills = parseSkills(talent.skils);
+
+                        return (
+                            <div key={talent.id} className="bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
+
+                                {/* KARTA YUQORI QISMI */}
+                                <div className="p-5 md:p-7">
+                                    <div className="flex flex-col md:flex-row justify-between items-start gap-6">
+                                        <div className="flex items-center gap-4 md:gap-5">
+                                            {/* Avatar */}
+                                            <div className="relative shrink-0">
+                                                <img
+                                                    src={talent.image || "https://via.placeholder.com/150"}
+                                                    alt={talent.last_name}
+                                                    className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover grayscale border border-gray-100"
+                                                />
                                             </div>
-                                        )}
-                                    </div>
-
-                                    <div className="avatar-name-container">
-                                        <p className="talent-role">{talent.role}</p>
-                                        <h3 className="talent-name">
-                                            {talent.firstName} {talent.lastName}
-                                        </h3>
-                                    </div>
-
-                                    {/* Narx va manzil o'ng tomonda */}
-                                    <div className="talent-price-location">
-                                        <div className="talent-location">
-                                            <svg className="location-icon" viewBox="0 0 24 24" fill="currentColor">
-                                                <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z" />
-                                            </svg>
-                                            <span>{talent.city}</span>
+                                            <div>
+                                                <h2 className="text-lg md:text-2xl font-bold text-[#3a3a3a] leading-tight">
+                                                    {talent.specialty || talent.occupation || "Designer"}
+                                                </h2>
+                                                <p className="text-gray-700 text-[16px] md:text-[20px] font-medium mt-1">
+                                                    {talent.first_name} {talent.last_name}
+                                                </p>
+                                            </div>
                                         </div>
-                                        <div className="talent-price">{formatPrice(talent.price)}</div>
-                                    </div>
-                                </div>
 
-                                <div className="card-right">
-                                    <div className="talent-description">
-                                        <p>{talent.description}</p>
-                                    </div>
-
-                                    <hr className='hrrr' />
-
-                                    <div className="talent-skills">
-                                        <h4 className="skills-title">Required skills</h4>
-                                        <div className="skills-list">
-                                            {talent.skills && talent.skills.slice(0, 4).map((skill, idx) => (
-                                                <span key={idx} className="skill-tag">
-                                                    {skill}
-                                                </span>
-                                            ))}
+                                        {/* Joylashuv va Narx */}
+                                        <div className="flex flex-row md:flex-col justify-between items-center md:items-end w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
+                                            <div className="flex items-center text-[#4b5563] text-sm md:text-lg font-semibold">
+                                                <svg className="w-4 h-4 md:w-5 md:h-5 mr-1.5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                {talent.city || talent.location || "Uzbekistan"}
+                                            </div>
+                                            <div className="text-[18px] md:text-[25px] font-bold text-[#343434] tracking-tight mt-2">
+                                                {formatPrice(talent.minimum_salary)}
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="talent-buttons">
-                                        <Link to={`/talents/${talent.id}`} className="btn-view-profile">
-                                            View profile
-                                        </Link>
-                                        <button className="btn-resume">
-                                            Resume
-                                        </button>
+                                    {/* Bio / About */}
+                                    <div className="mt-6">
+                                        <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
+                                            {talent.about || "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content "}
+                                        </p>
                                     </div>
                                 </div>
+
+                                {/* AJRATUVCHI CHIZIQ */}
+                                <div className="border-t border-gray-100 mx-6"></div>
+
+                                {/* KARTA PASTKI QISMI */}
+                                <div className="p-5 md:p-8">
+                                    <div className="flex flex-col space-y-6">
+                                        <div>
+                                            <h4 className="text-[#6e7074] text-[14px] md:text-[18px] font-semibold uppercase tracking-wider mb-4">Required skills</h4>
+                                            <div className="flex flex-wrap gap-2 md:gap-2.5">
+                                                {skills.length > 0 ? (
+                                                    skills.map((s, idx) => (
+                                                        <span key={idx} className="px-3 py-1.5 md:px-4 md:py-2 bg-[#f1f5f9] text-[#475569] text-sm md:text-base font-medium rounded-lg border border-slate-100">
+                                                            {s.skill} ({s.experience_years} {parseFloat(s.experience_years) > 1 ? 'years' : 'year'})
+                                                        </span>
+                                                    ))
+                                                ) : (
+                                                    <span className="text-gray-400 text-xs italic font-medium">No skills specified</span>
+                                                )}
+                                            </div>
+                                        </div>
+
+                                        {/* Tugmalar */}
+                                        <div className="flex flex-col sm:flex-row justify-end gap-3 md:gap-4 mt-2">
+                                            <Link
+                                                to={`/talents/${talent.id}`}
+                                                className="w-full sm:w-auto px-6 md:px-[60px] py-3 md:py-[15px] bg-[#1D3D54] text-white text-base md:text-[20px] font-[650] rounded-lg hover:bg-[#152c3d] transition-all shadow-sm text-center"
+                                            >
+                                                View profile
+                                            </Link>
+                                            <button className="w-full sm:w-auto px-6 md:px-[40px] py-3 md:py-[15px] border-2 border-[#1D3D54] text-[#1D3D54] text-base md:text-[20px] font-[650] rounded-lg md:rounded-[15px] hover:bg-slate-50 transition-all text-center">
+                                                Resume
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                             </div>
-                        </div>
-                    ))
-                ) : (
-                    <div className="no-talents">
-                        <p>Hozircha talentlar mavjud emas...</p>
+                        );
+                    })}
+                </div>
+
+                {talents.length === 0 && !loading && (
+                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+                        <p className="text-gray-400 font-medium">Hozircha talentlar mavjud emas.</p>
                     </div>
                 )}
             </div>
