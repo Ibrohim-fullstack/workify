@@ -81,7 +81,7 @@ function Talents() {
                                             {/* Avatar */}
                                             <div className="relative shrink-0">
                                                 <img
-                                                    src={talent.image || "https://via.placeholder.com/150"}
+                                                    src={talent.image || "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI="}
                                                     alt={talent.last_name}
                                                     className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover grayscale border border-gray-100"
                                                 />

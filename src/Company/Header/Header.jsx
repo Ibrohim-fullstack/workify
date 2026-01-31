@@ -12,6 +12,7 @@ function Header() {
   const [lang, setLang] = useState('Eng');
   const [showLang, setShowLang] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false); // Modal state
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
 
@@ -28,6 +29,7 @@ function Header() {
     sessionStorage.clear();
     setUser(null);
     setIsOpen(false);
+    setIsLogoutModalOpen(false); // Modalni yopish
     navigate("/home");
     window.location.reload();
   };
@@ -58,7 +60,7 @@ function Header() {
             </NavLink>
           </nav>
 
-          {/* RIGHT SIDE (DESKTOP & MOBILE JOIN NOW) */}
+          {/* RIGHT SIDE */}
           <div className="flex items-center gap-3 lg:gap-6">
             {user ? (
               <div className="flex items-center gap-4">
@@ -86,7 +88,12 @@ function Header() {
                       <Link to="/my-company" onClick={() => setShowUserMenu(false)} className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-50 text-[#343C44] font-semibold">
                         <IoMdPerson size={18} className="text-[#163D5C]" /> My Profile
                       </Link>
-                      <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-500 font-semibold transition-colors">
+                      <button
+                        onClick={() => {
+                          setShowUserMenu(false);
+                          setIsLogoutModalOpen(true);
+                        }}
+                        className="w-full flex items-center gap-3 px-4 py-2.5 hover:bg-red-50 text-red-500 font-semibold transition-colors">
                         <IoMdLogOut size={18} /> Logout
                       </button>
                     </div>
@@ -98,7 +105,6 @@ function Header() {
                 <Link to="/signin" className="hidden sm:flex px-2 md:px-4 py-2 md:text-[18px] items-center justify-center bg-white border-[2px] border-[#163D5C] rounded-xl font-bold text-[#163D5C] hover:text-white hover:bg-[#163D5C]">
                   Sign in
                 </Link>
-
                 <Link to="/signup" className="sm:flex px-2 md:px-4 py-2 md:text-[18px] items-center justify-center bg-[#163D5C] border-[2px] border-[#163D5C] rounded-xl font-bold text-white hover:text-[#163D5C] hover:bg-white">
                   Join Now
                 </Link>
@@ -170,7 +176,6 @@ function Header() {
               )}
             </nav>
             <hr className="border-gray-100" />
-            {/* MOBILE SIDEBAR ACTIONS (STILL THERE) */}
             <div className="flex flex-col gap-3">
               {!user ? (
                 <>
@@ -182,21 +187,40 @@ function Header() {
                   </Link>
                 </>
               ) : (
-                <button onClick={handleLogout} className="w-full h-[50px] flex items-center justify-center gap-2 bg-red-50 text-red-500 rounded-xl font-bold">
+                <button
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="w-full h-[50px] flex items-center justify-center gap-2 bg-red-50 text-red-500 rounded-xl font-bold">
                   <IoMdLogOut size={20} /> Logout
                 </button>
               )}
             </div>
-            <div className="mt-auto flex justify-around p-2 bg-gray-50 rounded-xl">
-              {['Eng', 'Uzb', 'Rus'].map(item => (
-                <button key={item} onClick={() => handleLangChange(item)} className={`px-4 py-2 rounded-lg text-sm font-bold ${lang === item ? 'bg-[#163D5C] text-white' : 'text-gray-500'}`}>
-                  {item}
-                </button>
-              ))}
-            </div>
           </div>
         </div>
       </div>
+
+      {/* LOGOUT MODAL */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200] px-4">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200">
+            <h3 className="text-[20px] font-bold text-[#163D5C] mb-3">Logout</h3>
+            <p className="text-[#343C44] mb-8 text-[15px]">Do you really want to logout?</p>
+            <div className="flex gap-3">
+              <button
+                onClick={() => setIsLogoutModalOpen(false)}
+                className="flex-1 py-3 rounded-2xl font-bold border-2 border-[#163D5C] bg-[#163D5C] text-white hover:bg-white hover:text-[#163D5C] transition-all"
+              >
+                No
+              </button>
+              <button
+                onClick={handleLogout}
+                className="flex-1 py-3 rounded-2xl font-bold border-2 border-red-500 bg-red-500 text-white hover:bg-white hover:text-red-500 transition-all"
+              >
+                Yes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

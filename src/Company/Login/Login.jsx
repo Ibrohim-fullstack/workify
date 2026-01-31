@@ -16,6 +16,7 @@ function SignIn() {
     const navigate = useNavigate();
 
     useEffect(() => {
+        // Ikkala storage'dan ham tokenni tekshiramiz
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
         if (token) {
             navigate("/dashboard", { replace: true });
@@ -64,7 +65,15 @@ function SignIn() {
             const { token, company, message } = response.data;
 
             if (token) {
+                // Agar rememberMe true bo'lsa localStorage, aks holda sessionStorage
                 const storage = rememberMe ? localStorage : sessionStorage;
+
+                // Eski qoldiqlarni tozalab tashlash (chalkashlik bo'lmasligi uchun)
+                localStorage.removeItem("token");
+                sessionStorage.removeItem("token");
+                localStorage.removeItem("user_info");
+                sessionStorage.removeItem("user_info");
+
                 storage.setItem("token", token);
                 storage.setItem("user_info", JSON.stringify(company));
 
@@ -80,18 +89,25 @@ function SignIn() {
         }
     };
 
+    <Toaster
+        position="top-right"
+        toastOptions={{
+            duration: 3000,
+            style: {
+                background: '#363636',
+                color: '#fff',
+            },
+        }}
+    />
+
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#F4F4F4] font-['Mulish'] p-4">
-            <Toaster position="top-right" />
 
-            {/* Title */}
             <h1 className="text-[48px] md:text-[60px] font-bold text-[#404040] mb-8">Login</h1>
 
-            {/* Login Card */}
             <div className="w-full max-w-[500px] bg-white rounded-[30px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-8 md:p-12">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
 
-                    {/* Email Field */}
                     <div className="flex flex-col gap-2">
                         <label className="text-[18px] font-bold text-[#404040]" htmlFor="email">Email</label>
                         <div className={`flex items-center bg-[#F9FAFB] border rounded-xl px-4 h-[60px] transition-all ${errors.email ? 'border-red-500' : 'border-[#E5E7EB] focus-within:border-[#163D5C]'}`}>
@@ -100,14 +116,13 @@ function SignIn() {
                                 className="w-full bg-transparent px-4 outline-none text-[#163D5C] placeholder:text-[#C7C7C7]"
                                 type="email"
                                 id="email"
-                                placeholder="Forexaplae@mail.ru"
+                                placeholder="Example@gmail.com"
                                 value={formData.email}
                                 onChange={handleChange}
                             />
                         </div>
                     </div>
 
-                    {/* Password Field */}
                     <div className="flex flex-col gap-2">
                         <label className="text-[18px] font-bold text-[#404040]" htmlFor="password">Password</label>
                         <div className={`flex items-center bg-[#F9FAFB] border rounded-xl px-4 h-[60px] transition-all ${errors.password ? 'border-red-500' : 'border-[#E5E7EB] focus-within:border-[#163D5C]'}`}>
@@ -130,7 +145,6 @@ function SignIn() {
                         </div>
                     </div>
 
-                    {/* Remember & Forgot */}
                     <div className="flex items-center justify-between text-[14px]">
                         <label className="flex items-center gap-2 cursor-pointer group">
                             <input
@@ -147,7 +161,6 @@ function SignIn() {
                         </Link>
                     </div>
 
-                    {/* Sign In Button */}
                     <button
                         type="submit"
                         disabled={loading}
@@ -156,7 +169,6 @@ function SignIn() {
                         {loading ? "Signing in..." : "Sign in"}
                     </button>
 
-                    {/* Register Link */}
                     <p className="text-center text-[#343C44] text-[16px] font-medium">
                         Have no account yet?{" "}
                         <Link to="/signup" className="text-[#163D5C] font-bold hover:underline">
