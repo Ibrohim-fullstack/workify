@@ -1,19 +1,24 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
-import { 
-  MdDashboard, 
-  MdBusiness, 
-  MdWork, 
-  MdPeople, 
-  MdQuestionAnswer, 
+
+import {
+  MdWork,
+  MdQuestionAnswer,
   MdContactPhone,
-  MdLogout 
+  MdLogout
 } from 'react-icons/md';
+import { IoStatsChart } from "react-icons/io5";
+import { FaChartPie } from "react-icons/fa6";
+import { BsPersonCircle } from "react-icons/bs";
+import { IoMdSettings } from "react-icons/io";
 
 const Sidebar = () => {
   const navigate = useNavigate();
-  const [user, setUser] = useState({ name: '', city: '', img: null });
+  const [user, setUser] = useState({ company_name: 'TechCells Corp.', city: 'Tashkent', img: null });
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+
+  const defaultAvatar = "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=";
 
   useEffect(() => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
@@ -22,14 +27,13 @@ const Sidebar = () => {
     if (token) {
       try {
         const decoded = jwtDecode(token);
-        // JWT dan yoki user_info dan ma'lumotlarni yig'amiz
         setUser({
-          name: userInfo.company_name || decoded.email || 'TechCells Corp.',
+          company_name: userInfo.company_name || decoded.company_name || 'TechCells Corp.',
           city: userInfo.city || 'Tashkent',
-          img: userInfo.profileimg_url // null bo'lsa placeholder chiqadi
+          img: userInfo.profileimg_url || null
         });
       } catch (error) {
-        console.error("Token xatosi:", error);
+        console.error("Token error:", error);
       }
     }
   }, []);
@@ -42,67 +46,80 @@ const Sidebar = () => {
   };
 
   const navItems = [
-    { name: 'Dashboard', path: '/dashboard', icon: <MdDashboard size={22} /> },
-    { name: 'My company', path: '/my-company', icon: <MdBusiness size={22} /> },
-    { name: 'My jobs', path: '/jobss', icon: <MdWork size={22} /> },
-    { name: 'Talents', path: '/talentss', icon: <MdPeople size={22} /> },
-    { name: 'FAQ', path: '/faq', icon: <MdQuestionAnswer size={22} /> },
-    { name: 'Contacts', path: '/contacts', icon: <MdContactPhone size={22} /> },
+    { name: 'Dashboard', path: '/dashboard', icon: <IoStatsChart size={22} />, mobile: true },
+    { name: 'My company', path: '/my-company', icon: <FaChartPie size={22} />, mobile: true },
+    { name: 'My jobs', path: '/jobs', icon: <MdWork size={22} />, mobile: true },
+    { name: 'Talents', path: '/talents', icon: <BsPersonCircle size={22} />, mobile: true },
+    { name: 'FAQ', path: '/faq', icon: <MdQuestionAnswer size={22} />, mobile: false },
+    { name: 'Contacts', path: '/contacts', icon: <MdContactPhone size={22} />, mobile: false },
+    { name: 'Settings', path: '/settings', icon: <IoMdSettings size={22} />, mobile: true }
   ];
 
   return (
-    <div className="w-[300px] h-screen bg-white border-r border-gray-100 flex flex-col py-8 px-6">
-      
-      {/* PROFILE SECTION */}
-      <div className="flex items-center gap-4 mb-10 px-2">
-        <div className="w-12 h-12 rounded-xl bg-[#00A79D] flex items-center justify-center shrink-0 overflow-hidden">
-          {user.img ? (
-            <img src={user.img} alt="logo" className="w-full h-full object-cover" />
-          ) : (
-            /* Rasmdagi logoga o'xshash placeholder */
-            <div className="text-white border-4 border-white/30 rounded-lg p-1">
-               <MdBusiness size={24} />
-            </div>
-          )}
+    <>
+      <div className="fixed bottom-0 left-0 w-full h-[75px] bg-white border-t border-gray-100 flex flex-row items-center justify-around px-2 z-[100] 
+                      md:relative md:flex-col md:w-[280px] md:h-screen md:border-r md:border-t-0 md:py-8 md:px-5 md:justify-start">
+
+        {/* PROFILE SECTION */}
+        <div className="hidden md:flex items-center gap-4 mb-10 px-1 w-full">
+          <div className="w-12 h-12 rounded-full overflow-hidden border border-gray-100 flex-shrink-0 bg-gray-100">
+            <img
+              src={user.img || defaultAvatar}
+              alt="Profile"
+              className="w-full h-full object-cover"
+              onError={(e) => { e.target.src = defaultAvatar }}
+            />
+          </div>
+          <div className="flex flex-col overflow-hidden">
+            <h3 className="text-[#343C44] font-bold text-[17px] leading-tight truncate">{user.company_name}</h3>
+            <p className="text-[#C2C2C2] text-[14px] font-medium truncate">{user.city}</p>
+          </div>
         </div>
-        <div className="flex flex-col truncate">
-          <h3 className="text-[#343C44] font-bold text-[17px] truncate leading-tight">
-            {user.name}
-          </h3>
-          <p className="text-[#C2C2C2] text-[14px] font-medium">
-            {user.city}
-          </p>
-        </div>
+
+        {/* NAVIGATION */}
+        <nav className="flex flex-row md:flex-col gap-1 md:gap-2 w-full justify-around md:justify-start">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) => `
+                flex flex-col md:flex-row items-center gap-1 md:gap-4 px-2 md:px-4 py-2 md:py-3 rounded-xl transition-all duration-300
+                ${!item.mobile ? "hidden md:flex" : "flex"} 
+                ${isActive
+                  ? "text-[#163D5C] md:bg-[#163D5C] md:text-white"
+                  : "text-[#C2C2C2] hover:text-[#163D5C] md:hover:bg-gray-50"}
+              `}
+            >
+              <span className="shrink-0">{item.icon}</span>
+              <span className="text-[10px] md:text-[16px] font-semibold">{item.name}</span>
+            </NavLink>
+          ))}
+
+          {/* LOGOUT TUGMASI - Faqat Desktopda ko'rinadi */}
+          <button
+            onClick={() => setIsLogoutModalOpen(true)}
+            className="hidden md:flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 text-red-400 hover:text-red-600 hover:bg-red-50 w-full"
+          >
+            <MdLogout size={22} className="shrink-0" />
+            <span className="text-[16px] font-semibold">Logout</span>
+          </button>
+        </nav>
       </div>
 
-      {/* NAVIGATION */}
-      <nav className="flex flex-col gap-2 flex-grow">
-        {navItems.map((item) => (
-          <NavLink
-            key={item.path}
-            to={item.path}
-            className={({ isActive }) => `
-              flex items-center gap-4 px-4 py-3 rounded-lg font-semibold text-[16px] transition-all duration-200
-              ${isActive 
-                ? "bg-[#163D5C] text-white shadow-lg shadow-blue-900/20" 
-                : "text-[#C2C2C2] hover:bg-gray-50 hover:text-[#163D5C]"}
-            `}
-          >
-            <span className="shrink-0">{item.icon}</span>
-            <span>{item.name}</span>
-          </NavLink>
-        ))}
-      </nav>
-
-      {/* LOGOUT BUTTON */}
-      <button 
-        onClick={handleLogout}
-        className="mt-auto flex items-center gap-4 px-4 py-3 rounded-lg font-semibold text-[16px] text-red-400 hover:bg-red-50 transition-all duration-200 cursor-pointer"
-      >
-        <MdLogout size={22} />
-        <span>Logout</span>
-      </button>
-    </div>
+      {/* LOGOUT MODAL */}
+      {isLogoutModalOpen && (
+        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-[200] px-4">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl max-w-sm w-full animate-in fade-in zoom-in duration-200 font-mulish">
+            <h3 className="text-[20px] font-bold text-[#163D5C] mb-3">Logout</h3>
+            <p className="text-[#343C44] mb-8 text-[15px]">Do you really want to logout?</p>
+            <div className="flex gap-3">
+              <button onClick={() => setIsLogoutModalOpen(false)} className="flex-1 py-3 rounded-2xl font-bold border-2 border-[#163D5C] bg-[#163D5C] text-white hover:bg-white hover:text-[#163D5C] transition-all">No</button>
+              <button onClick={handleLogout} className="flex-1 py-3 rounded-2xl font-bold border-2 border-red-500 bg-red-500 text-white hover:bg-white hover:text-red-500 transition-all">Yes</button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 
