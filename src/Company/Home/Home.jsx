@@ -1,79 +1,126 @@
-import "./Home.css";
 import Header from "../Header/Header.jsx";
 import Footer from "../Footer/Footer.jsx";
-import { MdWork } from "react-icons/md";
-import { BsPersonPlusFill } from "react-icons/bs";
+
+import { MdOutlineWorkOutline, MdWork } from "react-icons/md";
 import { IoMdChatboxes } from "react-icons/io";
+import { BsPersonPlusFill } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
+import { HiOutlineSearch } from "react-icons/hi";
+
+import imgHome from "../../assets/imgHome.png";
+
 
 function Home() {
     return (
-        <div className="home-ibrohim">
+        <div className="w-full min-h-screen lg:h-[1580px] flex items-center justify-between flex-col  bg-white overflow-x-hidden">
             <Header />
-            <section>
-                <div className="container1">
-                    <div className="main-content-container">
-                        <div className="text">
-                            <p className="p1">
-                                Find aspiring talents and great employers
-                            </p>
-                            <p className="p2">
-                                Finding the best candidate is always hard. Tell us what you are looking for and choose one from among the best.
-                            </p>
-                        </div>
-                        <div className="search-wrapper">
-                            <div className="search-labels">
-                                <label className="label1">Hire a talent</label>
-                                <label className="label2">Find a job</label>
-                            </div>
-                            <div className="search-box">
-                                <div className="input1">
-                                    <MdWork className="icon" />
-                                    <input type="text"
+
+            <section className="w-full lg:h-auto flex items-center justify-between flex-col">
+
+                <section className="relative px-4 sm:px-8 md:px-16 lg:px-24 py-10 md:py-20 lg:pt-10 lg:pb-20 flex justify-center items-center flex-col lg:flex-row max-w-[1440px] mx-auto gap-12">
+
+                    <div className="w-full lg:w-1/2 z-10 text-center lg:text-left order-2 lg:order-1 flex flex-col items-center lg:items-start">
+                        <h2 className="text-3xl sm:text-4xl lg:text-[50px] font-semibold text-[#343C44] mb-4">
+                            Find aspiring talents <br className="hidden md:block" /> and great employers
+                        </h2>
+
+                        <p className="text-gray-500 text-sm md:text-base mb-6 md:mb-8 max-w-sm leading-relaxed">
+                            Finding the best candidate is always hard. Tell us what you are
+                            looking for and choose one from among the best.
+                        </p>
+
+                        <div className="bg-white p-1.5 rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] flex flex-col md:flex-row items-center gap-1.5 w-full max-w-lg border border-gray-100">
+                            <div className="flex-1 px-3 py-2 text-left w-full border-b md:border-b-0 md:border-r border-gray-100">
+                                <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
+                                    Hire a talent
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <HiOutlineSearch className="text-gray-300 text-xs" />
+                                    <input
+                                        type="text"
                                         placeholder="Who are you looking for?"
+                                        className="w-full outline-none text-xs text-slate-700 placeholder:text-gray-300 bg-transparent"
                                     />
                                 </div>
-
-                                <div className="input-separator"></div>
-
-                                <div className="input2">
-                                    <MdWork className="icon" />
-                                    <input type="text"
-                                        placeholder="What job are you looking for?"
-                                    />
-                                </div>
-
-                                <button className="search-btn">Search</button>
                             </div>
+
+                            <div className="flex-1 px-3 py-2 text-left w-full">
+                                <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
+                                    Find a job
+                                </label>
+                                <div className="flex items-center gap-2">
+                                    <MdOutlineWorkOutline className="text-gray-300 text-xs" />
+                                    <input
+                                        type="text"
+                                        placeholder="What job are you looking for?"
+                                        className="w-full outline-none text-xs text-slate-700 placeholder:text-gray-300 bg-transparent"
+                                    />
+                                </div>
+                            </div>
+
+                            <button className="bg-[#1B3B5A] border-[2px] border-[#163D5C] text-white px-6 py-3 rounded-lg font-bold text-xs w-full md:w-auto active:scale-95 transition-all duration-300 hover:bg-white hover:text-[#163D5C]">
+                                Search
+                            </button>
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-1/2 flex justify-center items-center order-1 lg:order-2 relative px-4">
+                        <div className="absolute inset-0 rounded-full blur-[80px] md:blur-[100px] opacity-30 scale-90 md:scale-110 mx-auto"></div>
+                        <img
+                            src={imgHome}
+                            alt="Hero"
+                            className="w-full max-w-[320px] sm:max-w-[450px] md:max-w-[650px] lg:max-w-[750px] h-auto lg:h-[550px] object-contain relative z-10 transition-transform duration-500 hover:scale-105 mx-auto"
+                        />
+                    </div>
+                </section>
+
+                <div className="w-full max-w-[1128px] px-6 py-20 lg:py-10 grid grid-cols-1 sm:grid-cols-2 lg:flex lg:justify-between gap-10 lg:gap-0">
+                    <div className="w-full lg:w-[210px] flex flex-col lg:mt-[20px]">
+                        <BsPersonPlusFill className="text-[35px] text-[#C2C2C2]" />
+                        <div className="text-xl text-[#343C44] font-normal pt-[10px]">
+                            Professional <br className="hidden lg:block" /> recruiter
+                        </div>
+                        <div className="text-base text-[#AAAAAA] font-normal pt-[10px]">
+                            Finding the best candidate is always hard.
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-[210px] flex flex-col lg:mt-[20px]">
+                        <MdWork className="text-[35px] text-[#C2C2C2]" />
+                        <div className="text-xl text-[#343C44] font-normal pt-[10px]">
+                            Find the right job you want fast
+                        </div>
+                        <div className="text-base text-[#AAAAAA] font-normal pt-[10px]">
+                            Launch your career on Workify.
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-[210px] flex flex-col lg:mt-[20px]">
+                        <IoMdChatboxes className="text-[35px] text-[#C2C2C2]" />
+                        <div className="text-xl text-[#343C44] font-normal pt-[10px]">
+                            All professionals need some help
+                        </div>
+                        <div className="text-base text-[#AAAAAA] font-normal pt-[10px]">
+                            As a pro recruiter, you need various skills to hire a great talent.
+                        </div>
+                    </div>
+
+                    <div className="w-full lg:w-[210px] flex flex-col lg:mt-[20px]">
+                        <CiSearch className="text-[35px] text-[#C2C2C2]" />
+                        <div className="text-xl text-[#343C44] font-normal pt-[10px]">
+                            Searching a job may be long and boring
+                        </div>
+                        <div className="text-base text-[#AAAAAA] font-normal pt-[10px]">
+                            Landing a good gig can be hard, when you have a strong competition.
                         </div>
                     </div>
                 </div>
-                <div className="container2">
-                    <div className="box box1">
-                        <BsPersonPlusFill className="box-icon" />
-                        <div className="p1">Professional <br /> recruiter</div>
-                        <div className="p2">Finding the best candidate is always hard.</div>
-                    </div>
-                    <div className="box box2">
-                        <MdWork className="box-icon" />
-                        <div className="p1">Find the right job you want fast</div>
-                        <div className="p2">Launch your career on Workify.</div>
-                    </div>
-                    <div className="box box3">
-                        <IoMdChatboxes className="box-icon" />
-                        <div className="p1">All professionals need some help</div>
-                        <div className="p2">As a pro recruiter, you need various skills to hire <br /> a great talent.</div>
-                    </div>
-                    <div className="box box4">
-                        <CiSearch className="box-icon" />
-                        <div className="p1">Searching a job may be long and boring</div>
-                        <div className="p2">Landing a good gig can be hard, when you have a strong competition.</div>
-                    </div>
-                </div>
+
             </section>
+
             <Footer />
         </div>
-    )
-};
+    );
+}
 
 export default Home;
