@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { companyApi } from "../../services/api"; 
+import { companyApi } from "../../services/api";
 import { IoMdMail } from "react-icons/io";
 import { MdLock } from "react-icons/md";
 import toast, { Toaster } from "react-hot-toast";
@@ -83,14 +83,14 @@ function SignIn() {
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#F4F4F4] font-['Mulish'] p-4">
             <Toaster position="top-right" />
-            
+
             {/* Title */}
             <h1 className="text-[48px] md:text-[60px] font-bold text-[#404040] mb-8">Login</h1>
 
             {/* Login Card */}
             <div className="w-full max-w-[500px] bg-white rounded-[30px] shadow-[0_8px_30px_rgb(0,0,0,0.12)] p-8 md:p-12">
                 <form onSubmit={handleSubmit} className="flex flex-col gap-6">
-                    
+
                     {/* Email Field */}
                     <div className="flex flex-col gap-2">
                         <label className="text-[18px] font-bold text-[#404040]" htmlFor="email">Email</label>
@@ -120,7 +120,7 @@ function SignIn() {
                                 value={formData.password}
                                 onChange={handleChange}
                             />
-                            <button 
+                            <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
                                 className="text-[#C7C7C7] hover:text-[#163D5C] transition-colors"
