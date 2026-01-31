@@ -12,7 +12,8 @@ function Talents() {
             try {
                 setLoading(true);
                 const response = await talentApi.getAll();
-                setTalents(response.data  []);
+                // BU YERDA: || operatori qo'shildi
+                setTalents(response.data || []);
             } catch (err) {
                 console.error('API Error:', err);
                 setError("Ma'lumotlarni yuklashda xatolik yuz berdi");
@@ -26,7 +27,8 @@ function Talents() {
     const formatCount = (count) => new Intl.NumberFormat('de-DE').format(count);
 
     const formatPrice = (price) => {
-        const value = price  0;
+        // BU YERDA: || operatori qo'shildi
+        const value = price || 0;
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
@@ -45,10 +47,10 @@ function Talents() {
     const getInitials = (firstName, lastName) => {
         const f = firstName ? firstName.charAt(0).toUpperCase() : '';
         const l = lastName ? lastName.charAt(0).toUpperCase() : '';
-        return f + l  '?';
+        // BU YERDA: || operatori qo'shildi
+        return (f + l) || '?';
     };
 
-    // --- SKELETON CARD (Yuklanish paytidagi ko'rinish) ---
     const SkeletonCard = () => (
         <div className="bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden animate-pulse">
             <div className="p-5 md:p-7">
@@ -77,7 +79,6 @@ function Talents() {
     return (
         <div className="bg-[#fcfcfc] min-h-screen p-4 md:p-8 font-sans">
             <div className="max-w-6xl mx-auto">
-                {/* HEADER QISMI */}
                 <div className="mb-6">
                     <div className="flex items-baseline gap-2 pb-3">
                         <span className="text-[20px] md:text-[25px] font-medium text-[#404040]">
@@ -90,10 +91,8 @@ function Talents() {
                     <div className="h-[1.5px] w-full bg-[#e5e7eb]"></div>
                 </div>
 
-                {/* TALENTLAR RO'YXATI */}
                 <div className="space-y-5">
                     {loading ? (
-                        // Yuklanayotgan paytda 3 ta soxta karta ko'rsatiladi
                         [1, 2, 3].map((i) => <SkeletonCard key={i} />)
                     ) : (
                         talents.map((talent) => {
@@ -107,9 +106,8 @@ function Talents() {
                                                     {talent.image ? (
                                                         <img
                                                             src={talent.image}
-                                                            alt={`${talent.first_name}`}
+                                                            alt={talent.first_name}
                                                             className="w-full h-full rounded-full object-cover grayscale border border-gray-100"
-                                                            onLoad={(e) => { if (e.target.nextSibling) e.target.nextSibling.style.display = 'none'; }}
                                                             onError={(e) => {
                                                                 e.target.style.display = 'none';
                                                                 if (e.target.nextSibling) e.target.nextSibling.style.display = 'flex';
@@ -125,7 +123,7 @@ function Talents() {
                                                 </div>
                                                 <div>
                                                     <h2 className="text-lg md:text-2xl font-bold text-[#3a3a3a] leading-tight">
-                                                        {talent.specialty  talent.occupation  "Designer"}
+                                                        {talent.specialty || talent.occupation || "Designer"}
                                                     </h2>
                                                     <p className="text-gray-700 text-[16px] md:text-[20px] font-medium mt-1">
                                                         {talent.first_name} {talent.last_name}
@@ -134,15 +132,16 @@ function Talents() {
                                             </div>
                                             <div className="flex flex-row md:flex-col justify-between items-center md:items-end w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
                                                 <div className="flex items-center text-[#4b5563] text-sm md:text-lg font-semibold">
-                                                    {talent.city  talent.location  "Uzbekistan"}
+                                                    {talent.city || talent.location || "Uzbekistan"}
                                                 </div>
                                                 <div className="text-[18px] md:text-[25px] font-bold text-[#343434] mt-2">
                                                     {formatPrice(talent.minimum_salary)}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="mt-6"><p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
-                                                {talent.about  "Experience and passion in building great products..."}
+                                        <div className="mt-6">
+                                            <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
+                                                {talent.about || "Experience and passion in building great products..."}
                                             </p>
                                         </div>
                                     </div>
@@ -166,7 +165,7 @@ function Talents() {
                                                 </div>
                                             </div>
                                             <div className="flex flex-col sm:flex-row justify-end gap-3 md:gap-4 mt-2">
-                                                <Link to={/talents/${talent.id}} className="px-6 md:px-[60px] py-3 bg-[#1D3D54] text-white font-[650] rounded-lg text-center">
+                                                <Link to={`/talents/${talent.id}`} className="px-6 md:px-[60px] py-3 bg-[#1D3D54] text-white font-[650] rounded-lg text-center">
                                                     View profile
                                                 </Link>
                                                 <button className="px-6 md:px-[40px] py-3 border-2 border-[#1D3D54] text-[#1D3D54] font-[650] rounded-lg">
