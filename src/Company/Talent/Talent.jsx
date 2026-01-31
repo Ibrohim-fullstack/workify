@@ -12,7 +12,7 @@ function Talents() {
             try {
                 setLoading(true);
                 const response = await talentApi.getAll();
-                setTalents(response.data || []);
+                setTalents(response.data  []);
             } catch (err) {
                 console.error('API Error:', err);
                 setError("Ma'lumotlarni yuklashda xatolik yuz berdi");
@@ -26,7 +26,7 @@ function Talents() {
     const formatCount = (count) => new Intl.NumberFormat('de-DE').format(count);
 
     const formatPrice = (price) => {
-        const value = price || 0;
+        const value = price  0;
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
@@ -45,7 +45,7 @@ function Talents() {
     const getInitials = (firstName, lastName) => {
         const f = firstName ? firstName.charAt(0).toUpperCase() : '';
         const l = lastName ? lastName.charAt(0).toUpperCase() : '';
-        return f + l || '?';
+        return f + l  '?';
     };
 
     // --- SKELETON CARD (Yuklanish paytidagi ko'rinish) ---
@@ -125,7 +125,7 @@ function Talents() {
                                                 </div>
                                                 <div>
                                                     <h2 className="text-lg md:text-2xl font-bold text-[#3a3a3a] leading-tight">
-                                                        {talent.specialty || talent.occupation || "Designer"}
+                                                        {talent.specialty  talent.occupation  "Designer"}
                                                     </h2>
                                                     <p className="text-gray-700 text-[16px] md:text-[20px] font-medium mt-1">
                                                         {talent.first_name} {talent.last_name}
@@ -134,16 +134,15 @@ function Talents() {
                                             </div>
                                             <div className="flex flex-row md:flex-col justify-between items-center md:items-end w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
                                                 <div className="flex items-center text-[#4b5563] text-sm md:text-lg font-semibold">
-                                                    {talent.city || talent.location || "Uzbekistan"}
+                                                    {talent.city  talent.location  "Uzbekistan"}
                                                 </div>
                                                 <div className="text-[18px] md:text-[25px] font-bold text-[#343434] mt-2">
                                                     {formatPrice(talent.minimum_salary)}
                                                 </div>
                                             </div>
                                         </div>
-                                        <div className="mt-6">
-                                            <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
-                                                {talent.about || "Experience and passion in building great products..."}
+                                        <div className="mt-6"><p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
+                                                {talent.about  "Experience and passion in building great products..."}
                                             </p>
                                         </div>
                                     </div>
@@ -167,7 +166,7 @@ function Talents() {
                                                 </div>
                                             </div>
                                             <div className="flex flex-col sm:flex-row justify-end gap-3 md:gap-4 mt-2">
-                                                <Link to={`/talents/${talent.id}`} className="px-6 md:px-[60px] py-3 bg-[#1D3D54] text-white font-[650] rounded-lg text-center">
+                                                <Link to={/talents/${talent.id}} className="px-6 md:px-[60px] py-3 bg-[#1D3D54] text-white font-[650] rounded-lg text-center">
                                                     View profile
                                                 </Link>
                                                 <button className="px-6 md:px-[40px] py-3 border-2 border-[#1D3D54] text-[#1D3D54] font-[650] rounded-lg">

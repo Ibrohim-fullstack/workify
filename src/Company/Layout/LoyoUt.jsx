@@ -9,11 +9,12 @@ const Layout = () => {
 
   // Dashboard qismiga kiruvchi barcha yo'llar ro'yxati
   const dashboardPaths = [
-    "/dashboard", 
-    "/my-company", 
-    "/faq", 
-    "/contacts", 
-    "/my-jobs"
+    "/dashboard",
+    "/my-company",
+    "/faq",
+    "/contacts",
+    "/my-jobs",
+    "/settings"
   ];
 
   // Hozirgi yo'l dashboard'ga tegishlimi yoki yo'qmi tekshiramiz
@@ -23,11 +24,12 @@ const Layout = () => {
     <div className="min-h-screen bg-[#F8F9FA]">
       {isDashboard ? (
         /* --- DASHBOARD REJIMI (Faqat Sidebar) --- */
-        <div className="flex h-screen overflow-hidden">
-          <aside className="w-[280px] h-full shrink-0 border-r border-gray-100 bg-white z-50">
+        // Layout.js ichidagi o'zgarish
+        <div className="flex flex-col md:flex-row h-screen overflow-hidden">
+          <aside className="order-2 md:order-1 w-full md:w-[300px] h-auto md:h-full shrink-0">
             <Sidebar />
           </aside>
-          <main className="flex-1 overflow-y-auto p-6 lg:p-10">
+          <main className="order-1 md:order-2 flex-1 overflow-y-auto p-4 lg:p-10 pb-[100px] md:pb-10">
             <Outlet />
           </main>
         </div>
