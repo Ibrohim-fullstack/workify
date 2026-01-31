@@ -10,6 +10,7 @@ import Jobs from "./Company/Jobs/Jobs.jsx";
 import Home from "./Company/Home/Home.jsx";
 import SignUpPage from "./Company/Register/Register.jsx";
 import SignIn from "./Company/Login/Login.jsx";
+import MyCompany from "./Company/MyCompany/MyCompany.jsx";
 import ForgotPassword1 from "./Company/ForgotPassword1/ForgotPassword1.jsx";
 import ForgotPassword2 from "./Company/ForgotPassword2/ForgotPassword2.jsx";
 import ForgotPassword3 from "./Company/ForgotPassword3/ForgotPassword3.jsx";
@@ -49,7 +50,7 @@ function App() {
           <Route path="/talents" element={<Talents />} />
 
           <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/my-company" element={<div>My Company Page</div>} />
+          <Route path="/my-company" element={<MyCompany/>} />
           <Route path="/faq" element={<div>FAQ Page</div>} />
           <Route path="/contacts" element={<div>Contacts Page</div>} />
         </Route>
