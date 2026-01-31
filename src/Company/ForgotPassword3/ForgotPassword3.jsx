@@ -8,6 +8,7 @@ const ForgotPassword3 = () => {
     const [timeLeft, setTimeLeft] = useState(300);
     const [loading, setLoading] = useState(false);
     const [isExpired, setIsExpired] = useState(false);
+    const [isError, setIsError] = useState(false); // Xatolik holati uchun
     const inputRefs = useRef([]);
 
     const navigate = useNavigate();
@@ -68,15 +69,19 @@ const ForgotPassword3 = () => {
         if (pastedText.length === 6 && /^\d+$/.test(pastedText)) {
             const newCode = pastedText.split('').slice(0, 6);
             setCode(newCode);
+            setIsError(false); // Paste qilinganda xatoni tozalash
             inputRefs.current[5].focus();
         }
     };
 
     const handleChange = (index, value) => {
         if (isExpired || isNaN(value)) return;
+
+        setIsError(false); // Raqam o'zgarganda qizil rangni yo'qotish
         const newCode = [...code];
         newCode[index] = value.substring(value.length - 1);
         setCode(newCode);
+
         if (value && index < 5) {
             inputRefs.current[index + 1].focus();
         }
@@ -96,6 +101,7 @@ const ForgotPassword3 = () => {
         const fullCode = code.join('');
         if (fullCode.length < 6) {
             toast.info("Kodni to'liq kiriting");
+            setIsError(true); // To'liq kiritilmasa ham qizartiramiz
             return;
         }
         setLoading(true);
@@ -105,6 +111,7 @@ const ForgotPassword3 = () => {
             localStorage.removeItem(`resetStartTime_${email}`);
             navigate('/forgot-password-4', { state: { email, code: fullCode } });
         } catch (err) {
+            setIsError(true); // API xato bersa qizartiramiz
             toast.error("Kod noto'g'ri!");
         } finally {
             setLoading(false);
@@ -117,6 +124,7 @@ const ForgotPassword3 = () => {
         localStorage.setItem(`resetStartTime_${email}`, startTime.toString());
         setTimeLeft(300);
         setIsExpired(false);
+        setIsError(false);
         setCode(['', '', '', '', '', '']);
         toast.info("Yangi kod yuborildi!");
     };
@@ -140,7 +148,10 @@ const ForgotPassword3 = () => {
                             ref={(el) => (inputRefs.current[idx] = el)}
                             type="text"
                             maxLength={1}
-                            className="w-[42px] h-[52px] md:w-[56px] md:h-[64px] border-2 border-gray-200 rounded-xl text-center text-[20px] md:text-[24px] font-bold shadow-sm focus:border-blue-500 focus:outline-none transition-all disabled:bg-gray-100 disabled:opacity-70"
+                            className={`w-[42px] h-[52px] md:w-[56px] md:h-[64px] border-2 rounded-xl text-center text-[20px] md:text-[24px] font-bold shadow-sm focus:outline-none transition-all disabled:bg-gray-100 disabled:opacity-70 ${isError
+                                    ? 'border-red-500 border-[2px] focus:border-red-500'
+                                    : 'border-gray-200 focus:border-blue-500'
+                                }`}
                             value={num}
                             onChange={(e) => handleChange(idx, e.target.value)}
                             onKeyDown={(e) => handleKeyDown(idx, e)}
