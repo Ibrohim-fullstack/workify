@@ -48,7 +48,7 @@ const Sidebar = () => {
   const navItems = [
     { name: 'Dashboard', path: '/dashboard', icon: <IoStatsChart size={22} />, mobile: true },
     { name: 'My company', path: '/my-company', icon: <FaChartPie size={22} />, mobile: true },
-    { name: 'My jobs', path: '/jobs', icon: <MdWork size={22} />, mobile: true },
+    { name: 'My jobs', path: '/my-jobs', icon: <MdWork size={22} />, mobile: true },
     { name: 'Talents', path: '/talents', icon: <BsPersonCircle size={22} />, mobile: true },
     { name: 'FAQ', path: '/faq', icon: <MdQuestionAnswer size={22} />, mobile: false },
     { name: 'Contacts', path: '/contacts', icon: <MdContactPhone size={22} />, mobile: false },
