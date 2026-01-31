@@ -49,8 +49,8 @@ const MyCompany = () => {
 
       if (Array.isArray(jobsData)) {
         const myJobs = jobsData.filter(job => String(job.company_id) === String(companyId));
-        const hiredCount = Array.isArray(appsData) 
-          ? appsData.filter(app => app.status === 'accepted' || app.status === 'hired').length 
+        const hiredCount = Array.isArray(appsData)
+          ? appsData.filter(app => app.status === 'accepted' || app.status === 'hired').length
           : 0;
 
         setStats({
@@ -72,22 +72,24 @@ const MyCompany = () => {
     if (!targetId) return;
 
     try {
-      const response = await companyApi.update(targetId, formData);
+      // Yangilashda "since" yoki "created_at" yuborilmasligi uchun tozalash mumkin
+      const { created_at, ...updateData } = formData;
+      const response = await companyApi.update(targetId, updateData);
+
       if (response.status === 200 || response.data) {
         setIsModalOpen(false);
         fetchData();
-        alert("Saqlandi!");
+        alert("Ma'lumotlar muvaffaqiyatli saqlandi!");
       }
     } catch (error) {
       alert("Xatolik yuz berdi");
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen animate-pulse">Yuklanmoqda... ⏳</div>;
+  if (loading) return <div className="flex justify-center items-center h-screen animate-pulse font-bold text-[#163D5C]">Ma'lumotlar yuklanmoqda... ⏳</div>;
 
   return (
     <div className="p-3 sm:p-6 bg-[#F9FAFB] min-h-screen font-sans">
-      {/* HEADER: Mobil va Desktop uchun moslashuvchan */}
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 mt-12 md:mt-0">
         <h1 className="text-xl sm:text-2xl font-bold text-[#4B5563] bg-white px-4 py-3 rounded-xl shadow-sm w-full sm:flex-1 text-center sm:text-left">
           Company profile
@@ -98,12 +100,13 @@ const MyCompany = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-6">
-        
-        {/* LEFT COLUMN: Profil kartasi */}
-        <div className="bg-white rounded-[2rem] p-5 sm:p-8 shadow-sm border border-gray-100 relative h-fit">
+
+        {/* LEFT COLUMN */}
+        <div className="bg-white rounded-[2rem] p-5 sm:p-8 shadow-sm border border-gray-100 relative h-fit text-left">
           <button onClick={() => setIsModalOpen(true)} className="absolute right-6 top-6 text-gray-300 hover:text-blue-500">
             <Pencil size={18} />
           </button>
+
 
           <div className="flex flex-col items-center mb-6">
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#00A79D]/10 p-1 mb-4 relative">
@@ -117,26 +120,32 @@ const MyCompany = () => {
                 <ShieldCheck className="text-blue-500" size={18} />
               </div>
             </div>
-            <h2 className="text-lg sm:text-xl font-bold text-[#1F2937] text-center">
+            <h2 className="text-lg sm:text-xl font-bold text-[#1F2937] text-center px-2">
               {company?.company_name || 'Nomaʼlum kompaniya'}
             </h2>
             <p className="text-gray-400 text-xs sm:text-sm">{company?.industry || 'Soha kiritilmagan'}</p>
           </div>
 
           <div className="space-y-2 pt-4 border-t border-gray-50">
+            <h3 className="font-bold text-gray-700 mb-3 text-sm">Company info:</h3>
+            {/* RASMDAGI MA'LUMOTLAR QAYTARILDI */}
+            <InfoRow
+              label="Since"
+              value={company?.created_at ? new Date(company.created_at).getFullYear() : '2026'}
+            />
             <InfoRow label="City" value={company?.city} />
+            <InfoRow label="Country" value={company?.country} />
             <InfoRow label="Phone" value={company?.phone} />
             <InfoRow label="Email" value={company?.email} />
             <InfoRow label="Website" value={company?.website} isLink />
           </div>
         </div>
 
-        {/* RIGHT COLUMN: Statistika va About */}
+        {/* RIGHT COLUMN */}
         <div className="space-y-6">
-          {/* STATISTIKA: Mobil ekranda raqamlar sig'ishi uchun kichraytirildi */}
-          <div className="bg-gradient-to-r from-[#2B3263] via-[#7B4BA2] to-[#BD4CA1] rounded-[2rem] p-5 sm:p-10 text-white shadow-lg">
-            <p className="text-center text-[10px] font-bold uppercase tracking-widest opacity-80 mb-4 sm:mb-8">Statistics</p>
-            <div className="grid grid-cols-3 gap-1 text-center">
+          <div className="bg-gradient-to-r from-[#2B3263] via-[#7B4BA2] to-[#BD4CA1] rounded-[2rem] p-5 sm:p-10 text-white shadow-lg text-center">
+            <p className="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-4 sm:mb-8 text-center w-full">Statistics</p>
+            <div className="grid grid-cols-3 gap-1">
               <StatBox number={stats.active} label="Active" />
               <div className="border-x border-white/20">
                 <StatBox number={`+${stats.posted}`} label="Posted" />
@@ -145,9 +154,9 @@ const MyCompany = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-gray-100 relative min-h-[200px]">
+          <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-gray-100 relative min-h-[200px] text-left">
             <button onClick={() => setIsModalOpen(true)} className="absolute right-6 top-6 text-gray-300 hover:text-blue-500">
-              <Pencil size={18} />
+              < Pencil size={18} />
             </button>
             <h3 className="font-bold text-gray-800 text-lg mb-4">About company</h3>
             <p className="text-gray-500 text-xs sm:text-base leading-relaxed whitespace-pre-wrap">
@@ -157,7 +166,8 @@ const MyCompany = () => {
         </div>
       </div>
 
-      {/* EDIT MODAL: Mobil telefonda to'liq ekran bo'lishi va skroll bo'lishi uchun */}
+
+      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-2">
           <div className="bg-white rounded-[2rem] w-full max-w-2xl shadow-2xl overflow-hidden relative max-h-[95vh] flex flex-col">
@@ -166,7 +176,7 @@ const MyCompany = () => {
             </button>
             <form onSubmit={handleUpdate} className="p-5 sm:p-10 overflow-y-auto">
               <h2 className="text-lg font-bold text-center text-gray-700 mb-6 uppercase tracking-wide">Edit details</h2>
-              
+
               <div className="flex flex-col items-center mb-6">
                 <div className="relative w-20 h-20 sm:w-24 sm:h-24">
                   <img src={formData?.profileimg_url || defaultAvatar} className="w-full h-full rounded-full object-cover border" alt="Preview" />
@@ -184,6 +194,16 @@ const MyCompany = () => {
                 <ModalInput label="Industry" value={formData?.industry} onChange={v => setFormData({ ...formData, industry: v })} />
                 <ModalInput label="Country" value={formData?.country} onChange={v => setFormData({ ...formData, country: v })} />
                 <ModalInput label="City" value={formData?.city} onChange={v => setFormData({ ...formData, city: v })} />
+                {/* SINCE YANGILANMAYDIGAN QILINDI */}
+                <div className="flex flex-col opacity-60">
+                  <label className="text-gray-500 font-bold mb-1 text-[11px] ml-1 text-left">Since (Read-only)</label>
+                  <input
+                    type="text"
+                    className="border border-gray-100 rounded-xl p-2 bg-gray-100 cursor-not-allowed text-sm"
+                    value={formData?.created_at ? new Date(formData.created_at).getFullYear() : '2015'}
+                    readOnly
+                  />
+                </div>
               </div>
 
               <div className="mt-4 text-left">
@@ -196,7 +216,7 @@ const MyCompany = () => {
                 />
               </div>
 
-              <button type="submit" className="mt-6 bg-[#5CB85C] text-white w-full py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform">
+              <button type="submit" className="mt-6 bg-[#5CB85C] text-white w-full py-3 rounded-xl font-bold shadow-lg active:scale-95 transition-transform uppercase tracking-wider">
                 Save Changes
               </button>
             </form>
@@ -207,13 +227,13 @@ const MyCompany = () => {
   );
 };
 
-// MEDIA QILINGAN HELPERS
+
 const InfoRow = ({ label, value, isLink }) => (
-  <div className="flex flex-col sm:flex-row sm:justify-between text-[11px] sm:text-sm py-2 border-b border-gray-50 sm:border-none">
+  <div className="flex flex-row justify-between text-[11px] sm:text-sm py-2 border-b border-gray-50 text-left">
     <span className="text-gray-400 font-medium">{label}:</span>
-    <span className="font-bold text-gray-700 truncate sm:ml-2">
+    <span className="font-bold text-gray-700 truncate ml-2 text-right flex-1">
       {isLink && value ? (
-        <a href={value} className="text-blue-500 hover:underline">{value}</a>
+        <a href={value.startsWith('http') ? value : `https://${value}`} target="_blank" rel="noreferrer" className="text-blue-500 hover:underline">{value}</a>
       ) : (
         value || '---'
       )}
@@ -222,14 +242,14 @@ const InfoRow = ({ label, value, isLink }) => (
 );
 
 const StatBox = ({ number, label }) => (
-  <div className="flex flex-col items-center">
+  <div className="flex flex-col items-center justify-center">
     <span className="text-xl sm:text-3xl font-extrabold mb-1">{number}</span>
     <span className="text-[7px] sm:text-[10px] uppercase opacity-80 tracking-widest">{label}</span>
   </div>
 );
 
 const ModalInput = ({ label, value, onChange }) => (
-  <div className="flex flex-col">
+  <div className="flex flex-col text-left">
     <label className="text-gray-500 font-bold mb-1 text-[11px] ml-1">{label}</label>
     <input
       type="text"
