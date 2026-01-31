@@ -9,6 +9,7 @@ import Talents from "./Company/Talent/Talent.jsx";
 import Jobs from "./Company/Jobs/Jobs.jsx";
 import Home from "./Company/Home/Home.jsx";
 import SignUpPage from "./Company/Register/Register.jsx";
+import TelegramVerify from "./Company/Register/TelegramVerify.jsx";
 import SignIn from "./Company/Login/Login.jsx";
 import ForgotPassword1 from "./Company/ForgotPassword1/ForgotPassword1.jsx";
 import ForgotPassword2 from "./Company/ForgotPassword2/ForgotPassword2.jsx";
@@ -16,6 +17,8 @@ import ForgotPassword3 from "./Company/ForgotPassword3/ForgotPassword3.jsx";
 import ForgotPassword4 from "./Company/ForgotPassword4/ForgotPassword4.jsx";
 import Dashboard from "./Company/Dashboard/Dashboard.jsx";
 import MainLoyout from "./Company/Layout/MainLoyout.jsx";
+
+import Verify from "./Company/Register/Verify.jsx";
 
 function App() {
   return (
@@ -30,6 +33,8 @@ function App() {
         <Route element={<Layout />}>
           <Route path="/signin" element={<SignIn />} />
           <Route path="/signup" element={<SignUpPage />} />
+          <Route path="/signup/telegram" element={<TelegramVerify />} />
+          <Route path="/signup/verify" element={<Verify />} />
           <Route path="/forgot-password-1" element={<ForgotPassword1 />} />
           <Route path="/forgot-password-2" element={<ForgotPassword2 />} />
           <Route path="/forgot-password-3" element={<ForgotPassword3 />} />
