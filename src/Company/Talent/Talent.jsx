@@ -46,6 +46,13 @@ function Talents() {
         }
     };
 
+    // --- YANGLIK: Ism va Familiya bosh harflarini olish uchun helper ---
+    const getInitials = (firstName, lastName) => {
+        const f = firstName ? firstName.charAt(0).toUpperCase() : '';
+        const l = lastName ? lastName.charAt(0).toUpperCase() : '';
+        return f + l || '?';
+    };
+
     if (loading) return <div className="flex justify-center items-center min-h-screen text-gray-500 font-medium">Yuklanmoqda...</div>;
     if (error) return <div className="flex justify-center items-center min-h-screen text-red-500 font-medium">{error}</div>;
 
@@ -78,14 +85,21 @@ function Talents() {
                                 <div className="p-5 md:p-7">
                                     <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                                         <div className="flex items-center gap-4 md:gap-5">
-                                            {/* Avatar */}
+                                            {/* --- YANGLANGAN AVATAR QISMI --- */}
                                             <div className="relative shrink-0">
-                                                <img
-                                                    src={talent.image || "https://via.placeholder.com/150"}
-                                                    alt={talent.last_name}
-                                                    className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover grayscale border border-gray-100"
-                                                />
+                                                {talent.image ? (
+                                                    <img
+                                                        src={talent.image}
+                                                        alt={talent.last_name}
+                                                        className="w-16 h-16 md:w-20 md:h-20 rounded-full object-cover grayscale border border-gray-100"
+                                                    />
+                                                ) : (
+                                                    <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-[#e6e7e9] flex items-center justify-center text-[#2e5897] text-xl md:text-3xl font-bold border border-gray-100">
+                                                        {getInitials(talent.first_name, talent.last_name)}
+                                                    </div>
+                                                )}
                                             </div>
+
                                             <div>
                                                 <h2 className="text-lg md:text-2xl font-bold text-[#3a3a3a] leading-tight">
                                                     {talent.specialty || talent.occupation || "Designer"}
@@ -114,15 +128,13 @@ function Talents() {
                                     {/* Bio / About */}
                                     <div className="mt-6">
                                         <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
-                                            {talent.about || "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content "}
+                                            {talent.about || "It is a long established fact that a reader will be distracted by the readable content of a page when looking at its layout. The point of using Lorem Ipsum is that it has a more-or-less normal distribution of letters, as opposed to using 'Content"}
                                         </p>
                                     </div>
                                 </div>
 
-                                {/* AJRATUVCHI CHIZIQ */}
                                 <div className="border-t border-gray-100 mx-6"></div>
 
-                                {/* KARTA PASTKI QISMI */}
                                 <div className="p-5 md:p-8">
                                     <div className="flex flex-col space-y-6">
                                         <div>
@@ -131,7 +143,7 @@ function Talents() {
                                                 {skills.length > 0 ? (
                                                     skills.map((s, idx) => (
                                                         <span key={idx} className="px-3 py-1.5 md:px-4 md:py-2 bg-[#f1f5f9] text-[#475569] text-sm md:text-base font-medium rounded-lg border border-slate-100">
-                                                            {s.skill} ({s.experience_years} {parseFloat(s.experience_years) > 1 ? 'years' : 'year'})
+                                                            {s.skill} ({s.experience_years})
                                                         </span>
                                                     ))
                                                 ) : (
@@ -140,7 +152,6 @@ function Talents() {
                                             </div>
                                         </div>
 
-                                        {/* Tugmalar */}
                                         <div className="flex flex-col sm:flex-row justify-end gap-3 md:gap-4 mt-2">
                                             <Link
                                                 to={`/talents/${talent.id}`}
