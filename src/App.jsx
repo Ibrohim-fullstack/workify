@@ -9,14 +9,12 @@ import Talents from "./Company/Talent/Talent.jsx";
 import Jobs from "./Company/Jobs/Jobs.jsx";
 import Home from "./Company/Home/Home.jsx";
 import SignUpPage from "./Company/Register/Register.jsx";
-import TelegramVerify from "./Company/Register/TelegramVerify.jsx";
 import SignIn from "./Company/Login/Login.jsx";
 import ForgotPassword1 from "./Company/ForgotPassword1/ForgotPassword1.jsx";
 import ForgotPassword2 from "./Company/ForgotPassword2/ForgotPassword2.jsx";
 import ForgotPassword3 from "./Company/ForgotPassword3/ForgotPassword3.jsx";
 import ForgotPassword4 from "./Company/ForgotPassword4/ForgotPassword4.jsx";
 import Dashboard from "./Company/Dashboard/Dashboard.jsx";
-import MainLoyout from "./Company/Layout/MainLoyout.jsx";
 import TelegramVerify from "./Company/Register/TelegramVerify.jsx";
 import Verify from "./Company/Register/Verify.jsx";
 
@@ -30,8 +28,6 @@ const ProtectedRoute = ({ children }) => {
 
   return children;
 };
-
-import Verify from "./Company/Register/Verify.jsx";
 
 function App() {
   return (
