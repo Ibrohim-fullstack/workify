@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate, useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 
 import {
@@ -15,17 +15,19 @@ import { IoMdSettings } from "react-icons/io";
 
 const Sidebar = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [user, setUser] = useState({ company_name: 'TechCells Corp.', city: 'Tashkent', img: null });
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const defaultAvatar = "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=";
 
-  useEffect(() => {
+  const updateUserData = () => {
     const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-    const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+    const userInfoRaw = localStorage.getItem('user_info') || sessionStorage.getItem('user_info');
 
-    if (token) {
+    if (token && userInfoRaw) {
       try {
+        const userInfo = JSON.parse(userInfoRaw);
         const decoded = jwtDecode(token);
         setUser({
           company_name: userInfo.company_name || decoded.company_name || 'TechCells Corp.',
@@ -36,7 +38,20 @@ const Sidebar = () => {
         console.error("Token error:", error);
       }
     }
-  }, []);
+  };
+
+  useEffect(() => {
+    updateUserData();
+
+    // "userInfoUpdated" degan maxsus hodisani tinglaymiz
+    window.addEventListener('userInfoUpdated', updateUserData);
+    window.addEventListener('storage', updateUserData);
+    
+    return () => {
+      window.removeEventListener('userInfoUpdated', updateUserData);
+      window.removeEventListener('storage', updateUserData);
+    };
+  }, [location.pathname]);
 
   const handleLogout = () => {
     localStorage.clear();
@@ -95,7 +110,6 @@ const Sidebar = () => {
             </NavLink>
           ))}
 
-          {/* LOGOUT TUGMASI - Faqat Desktopda ko'rinadi */}
           <button
             onClick={() => setIsLogoutModalOpen(true)}
             className="hidden md:flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-300 text-red-400 hover:text-red-600 hover:bg-red-50 w-full"

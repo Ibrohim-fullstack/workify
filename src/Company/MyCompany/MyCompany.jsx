@@ -19,8 +19,11 @@ const MyCompany = () => {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const token = localStorage.getItem('token');
-      if (!token) return setLoading(false);
+      const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+      
+      if (!token) {
+        return setLoading(false);
+      }
 
       const decoded = jwtDecode(token);
       const companyId = decoded.id;
@@ -72,11 +75,24 @@ const MyCompany = () => {
     if (!targetId) return;
 
     try {
-      // Yangilashda "since" yoki "created_at" yuborilmasligi uchun tozalash mumkin
       const { created_at, ...updateData } = formData;
       const response = await companyApi.update(targetId, updateData);
 
       if (response.status === 200 || response.data) {
+        // --- YANGILANISHNI REAL-TIME QILISH UCHUN QO'SHILDI ---
+        const existingInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        const updatedUserInfo = {
+          ...existingInfo,
+          company_name: updateData.company_name || existingInfo.company_name,
+          city: updateData.city || existingInfo.city,
+          profileimg_url: updateData.profileimg_url || existingInfo.profileimg_url
+        };
+        localStorage.setItem('user_info', JSON.stringify(updatedUserInfo));
+        
+        // Sidebar va Headerga o'zgarish haqida xabar berish
+        window.dispatchEvent(new Event('storage'));
+        // -----------------------------------------------------
+
         setIsModalOpen(false);
         fetchData();
         alert("Ma'lumotlar muvaffaqiyatli saqlandi!");
@@ -100,13 +116,11 @@ const MyCompany = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-6">
-
         {/* LEFT COLUMN */}
         <div className="bg-white rounded-[2rem] p-5 sm:p-8 shadow-sm border border-gray-100 relative h-fit text-left">
           <button onClick={() => setIsModalOpen(true)} className="absolute right-6 top-6 text-gray-300 hover:text-blue-500">
             <Pencil size={18} />
           </button>
-
 
           <div className="flex flex-col items-center mb-6">
             <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full border-4 border-[#00A79D]/10 p-1 mb-4 relative">
@@ -128,7 +142,6 @@ const MyCompany = () => {
 
           <div className="space-y-2 pt-4 border-t border-gray-50">
             <h3 className="font-bold text-gray-700 mb-3 text-sm">Company info:</h3>
-            {/* RASMDAGI MA'LUMOTLAR QAYTARILDI */}
             <InfoRow
               label="Since"
               value={company?.created_at ? new Date(company.created_at).getFullYear() : '2026'}
@@ -156,7 +169,7 @@ const MyCompany = () => {
 
           <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm border border-gray-100 relative min-h-[200px] text-left">
             <button onClick={() => setIsModalOpen(true)} className="absolute right-6 top-6 text-gray-300 hover:text-blue-500">
-              < Pencil size={18} />
+              <Pencil size={18} />
             </button>
             <h3 className="font-bold text-gray-800 text-lg mb-4">About company</h3>
             <p className="text-gray-500 text-xs sm:text-base leading-relaxed whitespace-pre-wrap">
@@ -165,7 +178,6 @@ const MyCompany = () => {
           </div>
         </div>
       </div>
-
 
       {/* MODAL */}
       {isModalOpen && (
@@ -194,7 +206,6 @@ const MyCompany = () => {
                 <ModalInput label="Industry" value={formData?.industry} onChange={v => setFormData({ ...formData, industry: v })} />
                 <ModalInput label="Country" value={formData?.country} onChange={v => setFormData({ ...formData, country: v })} />
                 <ModalInput label="City" value={formData?.city} onChange={v => setFormData({ ...formData, city: v })} />
-                {/* SINCE YANGILANMAYDIGAN QILINDI */}
                 <div className="flex flex-col opacity-60">
                   <label className="text-gray-500 font-bold mb-1 text-[11px] ml-1 text-left">Since (Read-only)</label>
                   <input
@@ -226,7 +237,6 @@ const MyCompany = () => {
     </div>
   );
 };
-
 
 const InfoRow = ({ label, value, isLink }) => (
   <div className="flex flex-row justify-between text-[11px] sm:text-sm py-2 border-b border-gray-50 text-left">
