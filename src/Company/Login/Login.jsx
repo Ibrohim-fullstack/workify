@@ -16,9 +16,9 @@ function SignIn() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        // Ikkala storage'dan ham tokenni tekshiramiz
         const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-        if (token) {
+        // Qat'iy tekshiruv: token borligi va u yaroqli ekanligi
+        if (token && token !== "undefined" && token !== "null" && token.length > 10) {
             navigate("/dashboard", { replace: true });
         }
     }, [navigate]);
@@ -57,30 +57,37 @@ function SignIn() {
 
         setLoading(true);
         try {
+            // Login so'rovi
             const response = await companyApi.login({
-                email: formData.email.trim(),
+                email: formData.email.trim().toLowerCase(),
                 password: formData.password,
             });
 
             const { token, company, message } = response.data;
 
             if (token) {
-                // Agar rememberMe true bo'lsa localStorage, aks holda sessionStorage
+                // 1. Qayerga saqlashni aniqlaymiz
                 const storage = rememberMe ? localStorage : sessionStorage;
 
-                // Eski qoldiqlarni tozalab tashlash (chalkashlik bo'lmasligi uchun)
+                // 2. Avval barcha eski qoldiqlarni tozalaymiz
                 localStorage.removeItem("token");
                 sessionStorage.removeItem("token");
                 localStorage.removeItem("user_info");
                 sessionStorage.removeItem("user_info");
 
+                // 3. Yangi ma'lumotlarni yozamiz
                 storage.setItem("token", token);
                 storage.setItem("user_info", JSON.stringify(company));
 
                 toast.success(message || "Login muvaffaqiyatli!");
-                setTimeout(() => navigate("/dashboard", { replace: true }), 1000);
+
+                // 1 soniyadan keyin dashboardga o'tamiz
+                setTimeout(() => {
+                    navigate("/dashboard", { replace: true });
+                }, 1000);
             }
         } catch (error) {
+            console.error("Login xatosi:", error.response);
             const errorMessage = error.response?.data?.message || "Email yoki parol noto'g'ri";
             toast.error(errorMessage);
             setErrors({ email: true, password: true });
@@ -89,16 +96,8 @@ function SignIn() {
         }
     };
 
-    <Toaster
-        position="top-right"
-        toastOptions={{
-            duration: 3000,
-            style: {
-                background: '#363636',
-                color: '#fff',
-            },
-        }}
-    />
+    {/* Toaster shu yerda bo'lishi kerak */ }
+    <Toaster position="top-right" />
 
     return (
         <div className="min-h-screen w-full flex flex-col items-center justify-center bg-[#F4F4F4] font-['Mulish'] p-4">
@@ -121,6 +120,7 @@ function SignIn() {
                                 onChange={handleChange}
                             />
                         </div>
+                        {errors.email && <span className="text-red-500 text-sm">{errors.email}</span>}
                     </div>
 
                     <div className="flex flex-col gap-2">
@@ -138,11 +138,12 @@ function SignIn() {
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="text-[#C7C7C7] hover:text-[#163D5C] transition-colors"
+                                className="text-[#C7C7C7] hover:text-[#163D5C]"
                             >
                                 {showPassword ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
                             </button>
                         </div>
+                        {errors.password && <span className="text-red-500 text-sm">{errors.password}</span>}
                     </div>
 
                     <div className="flex items-center justify-between text-[14px]">
@@ -150,13 +151,13 @@ function SignIn() {
                             <input
                                 type="checkbox"
                                 id="remember"
-                                className="w-4 h-4 accent-[#163D5C] cursor-pointer"
+                                className="w-4 h-4 accent-[#163D5C]"
                                 checked={rememberMe}
                                 onChange={handleChange}
                             />
-                            <span className="text-[#404040] font-medium group-hover:text-[#163D5C]">Remember me</span>
+                            <span className="text-[#404040] font-medium">Remember me</span>
                         </label>
-                        <Link to="/forgot-password-1" className="text-[#163D5C] font-semibold underline hover:text-opacity-80">
+                        <Link to="/forgot-password-1" className="text-[#163D5C] font-semibold underline">
                             Forgot password?
                         </Link>
                     </div>
@@ -164,12 +165,12 @@ function SignIn() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full h-[56px] bg-[#163D5C] text-white rounded-xl font-bold text-[20px] shadow-lg hover:bg-white hover:text-[#163D5C] hover:border-2 hover:border-[#163D5C] transition-all duration-300 active:scale-95 disabled:opacity-70"
+                        className="w-full h-[56px] bg-[#163D5C] text-white rounded-xl font-bold text-[20px] shadow-lg hover:bg-opacity-90 transition-all active:scale-95 disabled:opacity-70"
                     >
                         {loading ? "Signing in..." : "Sign in"}
                     </button>
 
-                    <p className="text-center text-[#343C44] text-[16px] font-medium">
+                    <p className="text-center text-[#343C44] text-[16px]">
                         Have no account yet?{" "}
                         <Link to="/signup" className="text-[#163D5C] font-bold hover:underline">
                             Register
