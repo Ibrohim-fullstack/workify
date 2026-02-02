@@ -151,24 +151,31 @@ export const UZBEK_REGIONS = [
   "Toshkent shahri",
 ];
 
-// // --- RESET PASSWORD FUNKSIYALARI ---
+// --- RESET PASSWORD FUNKSIYALARI ---
+
 export const sendResetCode = async (email) => {
-  const response = await api.post("/company/send_reset_code", { email });
+  // URL rasmga ko'ra: /api/company/send-reset-code
+  const response = await api.post("/company/send-reset-code", {
+    email: email.trim().toLowerCase()
+  });
   return response.data;
 };
 
 export const checkResetCode = async (email, code) => {
-  const response = await api.post("/company/check_reset_code", { email, code });
+  // URL rasmga ko'ra: /api/company/check-reset-code
+  const response = await api.post("/company/check-reset-code", {
+    email: email.trim().toLowerCase(),
+    code: String(code).trim()
+  });
   return response.data;
 };
 
 export const confirmResetPassword = async (email, code, newPassword) => {
-  const response = await api.post("/company/confirm_reset_password", {
-    email,
-    code,
-    newPassword,
+  return await api.post("/company/confirm-reset-password", {
+    email: email.trim(),
+    code: String(code).trim(),
+    new_password: newPassword  // <--- Mana shu kalit so'z 400 xatosini yechimi!
   });
-  return response.data;
 };
 
 export default api;
