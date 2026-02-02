@@ -1,11 +1,10 @@
 import Header from "../Header/Header.jsx";
 import Footer from "../Footer/Footer.jsx";
 
-import { MdOutlineWorkOutline, MdWork } from "react-icons/md";
+import { MdWork } from "react-icons/md";
 import { IoMdChatboxes } from "react-icons/io";
 import { BsPersonPlusFill } from "react-icons/bs";
 import { CiSearch } from "react-icons/ci";
-import { HiOutlineSearch } from "react-icons/hi";
 
 import imgHome from "../../assets/imgHome.png";
 
@@ -28,40 +27,6 @@ function Home() {
                             Finding the best candidate is always hard. Tell us what you are
                             looking for and choose one from among the best.
                         </p>
-
-                        <div className="bg-white p-1.5 rounded-xl shadow-[0_15px_35px_rgba(0,0,0,0.08)] flex flex-col md:flex-row items-center gap-1.5 w-full max-w-lg border border-gray-100">
-                            <div className="flex-1 px-3 py-2 text-left w-full border-b md:border-b-0 md:border-r border-gray-100">
-                                <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
-                                    Hire a talent
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <HiOutlineSearch className="text-gray-300 text-xs" />
-                                    <input
-                                        type="text"
-                                        placeholder="Who are you looking for?"
-                                        className="w-full outline-none text-xs text-slate-700 placeholder:text-gray-300 bg-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="flex-1 px-3 py-2 text-left w-full">
-                                <label className="block text-[9px] font-bold text-gray-400 uppercase tracking-widest mb-0.5">
-                                    Find a job
-                                </label>
-                                <div className="flex items-center gap-2">
-                                    <MdOutlineWorkOutline className="text-gray-300 text-xs" />
-                                    <input
-                                        type="text"
-                                        placeholder="What job are you looking for?"
-                                        className="w-full outline-none text-xs text-slate-700 placeholder:text-gray-300 bg-transparent"
-                                    />
-                                </div>
-                            </div>
-
-                            <button className="bg-[#1B3B5A] border-[2px] border-[#163D5C] text-white px-6 py-3 rounded-lg font-bold text-xs w-full md:w-auto active:scale-95 transition-all duration-300 hover:bg-white hover:text-[#163D5C]">
-                                Search
-                            </button>
-                        </div>
                     </div>
 
                     <div className="w-full lg:w-1/2 flex justify-center items-center order-1 lg:order-2 relative px-4">

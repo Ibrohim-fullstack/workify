@@ -4,7 +4,7 @@ import { CiUser } from "react-icons/ci";
 import { IoWalletOutline } from "react-icons/io5";
 import { HiMenuAlt3, HiX } from "react-icons/hi";
 import { IoMdArrowDropdown, IoMdLogOut, IoMdPerson } from "react-icons/io";
-import { MdDashboard } from "react-icons/md";
+import { MdDashboard, MdLanguage } from "react-icons/md";
 import { GoChevronDown } from "react-icons/go";
 
 function Header() {
@@ -160,7 +160,7 @@ function Header() {
             <button onClick={() => setIsOpen(false)} className="text-3xl text-gray-400 hover:text-red-500 transition-colors"><HiX /></button>
           </div>
 
-          <div className="p-6 flex flex-col gap-6 flex-1">
+          <div className="p-6 flex flex-col gap-6 flex-1 overflow-y-auto">
             {user && (
               <div className="flex items-center gap-3 p-4 bg-blue-50/50 rounded-2xl">
                 <div className="w-12 h-12 rounded-full bg-[#163D5C] text-white flex items-center justify-center text-lg font-bold shadow-sm">
@@ -182,6 +182,24 @@ function Header() {
                   <MobileNavLink to="/my-company" icon={<IoMdPerson size={24} />} label="My Profile" onClick={() => setIsOpen(false)} />
                 </>
               )}
+
+              {/* RESPONSIVE LANGUAGE MENU */}
+              <div className="mt-4 border-t pt-4 px-4">
+                <p className="text-xs font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-2">
+                  <MdLanguage size={16} /> Select Language
+                </p>
+                <div className="grid grid-cols-3 gap-2">
+                  {['Eng', 'Uzb', 'Rus'].map((item) => (
+                    <button
+                      key={item}
+                      onClick={() => handleLangChange(item)}
+                      className={`py-2 rounded-lg text-[14px] font-bold transition-all ${lang === item ? "bg-[#163D5C] text-white" : "bg-gray-100 text-[#343C44] hover:bg-gray-200"}`}
+                    >
+                      {item}
+                    </button>
+                  ))}
+                </div>
+              </div>
             </nav>
 
             <div className="mt-auto flex flex-col gap-3">
