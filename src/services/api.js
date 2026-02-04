@@ -1,159 +1,174 @@
-    import axios from 'axios';
+import axios from "axios";
 
-    const API_URL = "https://workifybackend-production.up.railway.app/api";
+const API_URL = "https://workifybackend-production.up.railway.app/api";
 
-    const api = axios.create({
-    baseURL: API_URL,
-    });
+const api = axios.create({
+  baseURL: API_URL,
+});
 
-    api.interceptors.request.use((config) => {
-    const token = localStorage.getItem('token');
+// --- INTERCEPTORS ---
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
     if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+      config.headers.Authorization = `Bearer ${token}`;
     }
     return config;
-    }, (error) => {
+  },
+  (error) => {
     return Promise.reject(error);
+  },
+);
+
+// --- TALENT API ---
+export const talentApi = {
+  registerTalent: (formData) => {
+    return api.post("/talent/register", formData);
+  },
+  sendVerifyCode: (email) => api.post("/talent/send-verify-code", { email }),
+  checkVerifyCode: (email, code) =>
+    api.post("/talent/check-verify-code", { email, code }),
+  confirmVerifyEmail: (data) => api.post("/talent/confirm-verify-email", data),
+  sendResetCode: (email) => api.post("/talent/send-reset-code", { email }),
+  checkResetCode: (email, code) => {
+    return api.post("/talent/check-reset-code", {
+      email: email.trim(),
+      code: String(code),
     });
+  },
+  confirmResetPassword: (email, code, newPassword) =>
+    api.post("/talent/confirm-reset-password", { email, code, newPassword }),
+  login: (data) => api.post("/talent/login", data),
+  getAll: () => api.get("/talent"),
+  getById: (id) => api.get(`/talent/${id}`),
+  search: (query) => api.get(`/talent/search?query=${query}`),
+  update: (id, formData) => api.put(`/talent/${id}`, formData),
+  delete: (id) => api.delete(`/talent/${id}`),
+};
 
-    // --- TALENT API ---
-    export const talentApi = {
-    registerTalent: (formData) => {
-        const token = localStorage.getItem("token");
-        return api.post("/talent/register", formData, {
-        headers: { Authorization: `Bearer ${token}` },
-        });
-    },
-
-    sendVerifyCode: (email) => api.post("/talent/send-verify-code", { email }),
-    checkVerifyCode: (email, code) => api.post("/talent/check-verify-code", { email, code }),
-    confirmVerifyEmail: (data) => api.post("/talent/confirm-verify-email", data),
-
-    sendResetCode: (email) => api.post("/talent/send-reset-code", { email }),
-    checkResetCode: (email, code) => {
-    return api.post("/talent/check-reset-code", { 
-        email: email.trim(), 
-        code: String(code) 
-    });
-    },
-    confirmResetPassword: (email, code, newPassword) =>
-        api.post("/talent/confirm-reset-password", { email, code, newPassword }),
-
-    login: (data) => api.post("/talent/login", data),
-    getAll: () => api.get("/talent"),
-    getById: (id) => api.get(`/talent/${id}`),
-    search: (query) => api.get(`/talent/search?query=${query}`),
-    update: (id, formData) => {
-        const token = localStorage.getItem("token");
-        return api.put(`/talent/${id}`, formData, {
-        headers: { Authorization: `Bearer ${token}` },
-        });
-    },
-    delete: (id) => api.delete(`/talent/${id}`),
-    };
-
-
-    // --- COMPANY API ---
-    export const companyApi = {
-    register: (formData) => api.post('/company/register', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+export const companyApi = {
+  registerCompany: (formData) =>
+    api.post("/company/register", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     }),
-    login: (data) => api.post('/company/login', data),
-    getProfile: () => api.get('/company/profile'),
-    getAll: () => api.get('/company'),
-    getById: (id) => api.get(`/company/${id}`),
-    search: (query) => api.get(`/company/search?query=${query}`),
-    update: (id, data) => api.put(`/company/${id}`, data),
-    delete: (id) => api.delete(`/company/${id}`),
-    };
 
-    // --- JOBS API ---
-    export const jobApi = {
-    create: (data) => api.post('/jobs', data),
-    getAll: () => api.get('/jobs'),
-    getById: (id) => api.get(`/jobs/${id}`),
-    getByCompany: (companyId) => api.get(`/jobs/company/${companyId}`),
-    search: (query) => api.get(`/jobs/search?query=${query}`),
-    getMatchingJobs: (companyId = "") => api.get(`/jobs/my-skills${companyId ? `?company_id=${companyId}` : ''}`),
-    update: (id, data) => api.put(`/jobs/${id}`, data),
-    delete: (id) => api.delete(`/jobs/${id}`),
-    };
+  verifyCode: async (email, code) => {
+    try {
+      const response = await api.post("/company/check-verify-code", {
+        email: email.trim().toLowerCase(),
+        code: String(code).trim(),
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Xatolik tafsiloti:", error.response);
+      const msg = error.response?.data?.message || "Kod noto‘g‘ri";
+      throw new Error(msg);
+    }
+  },
 
-    export const applicationApi = {
-    apply: (formData) => api.post('/job-applications', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' }
+  resendCode: async (email) => {
+    try {
+      const response = await api.post("/company/resend-code", {
+        email: email.trim().toLowerCase(),
+      });
+      return response.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || "Xatolik yuz berdi");
+    }
+  },
+
+  login: (data) => api.post("/company/login", data),
+  getProfile: () => api.get("/company/profile"),
+  getAll: () => api.get("/company"),
+  getById: (id) => api.get(`/company/${id}`),
+  search: (query) => api.get(`/company/search?query=${query}`),
+  update: (id, data) => api.put(`/company/${id}`, data),
+  delete: (id) => api.delete(`/company/${id}`),
+};
+
+// --- JOBS API ---
+export const jobApi = {
+  create: (data) => api.post("/jobs", data),
+  getAll: () => api.get("/jobs"),
+  getById: (id) => api.get(`/jobs/${id}`),
+  getByCompany: (companyId) => api.get(`/jobs/company/${companyId}`),
+  search: (query) => api.get("/jobs/search", { params: { query } }),
+  getMatchingJobs: (companyId = "") =>
+    api.get(`/jobs/my-skills${companyId ? `?company_id=${companyId}` : ""}`),
+  update: (id, data) => api.put(`/jobs/${id}`, data),
+  delete: (id) => api.delete(`/jobs/${id}`),
+};
+
+// --- APPLICATIONS API ---
+export const applicationApi = {
+  apply: (formData) =>
+    api.post("/job-applications", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     }),
-    getAll: () => api.get('/job-applications'),
-    getById: (id) => api.get(`/job-applications/${id}`),
-    updateStatus: (id, data) => api.put(`/job-applications/${id}`, data),
-    delete: (id) => api.delete(`/job-applications/${id}`),
-    };
+  getAll: () => api.get("/job-applications"),
+  getById: (id) => api.get(`/job-applications/${id}`),
+  updateStatus: (id, data) => api.put(`/job-applications/${id}`, data),
+  delete: (id) => api.delete(`/job-applications/${id}`),
+};
 
-    export const contactApi = {
-    sendMessage: (data) => api.post('/contacts', data),
-    getAll: () => api.get('/contacts'),
-    getById: (id) => api.get(`/contacts/${id}`),
-    };
+// --- CONTACT API ---
+export const contactApi = {
+  sendMessage: (data) => api.post("/contacts", data),
+  getAll: () => api.get("/contacts"),
+  getById: (id) => api.get(`/contacts/${id}`),
+};
 
-    // Company page 
+// --- KONSTANTALAR ---
+export const COUNTRIES = [
+  "Uzbekistan",
+  "USA",
+  "Turkey",
+  "Kazakhstan",
+  "Russia",
+];
+export const INDUSTRIES = [
+  "Technology",
+  "Finance",
+  "Healthcare",
+  "Education",
+  "Manufacturing",
+  "Other",
+];
+export const UZBEK_REGIONS = [
+  "Andijon viloyati",
+  "Buxoro viloyati",
+  "Farg'ona viloyati",
+  "Jizzax viloyati",
+  "Xorazm viloyati",
+  "Namangan viloyati",
+  "Navoiy viloyati",
+  "Qashqadaryo viloyati",
+  "Qoraqalpog'iston Respublikasi",
+  "Samarqand viloyati",
+  "Sirdaryo viloyati",
+  "Surxondaryo viloyati",
+  "Toshkent viloyati",
+  "Toshkent shahri",
+];
 
-    const fetchAPI = async (endpoint, options = {}) => {
-        try {
-            const response = await fetch(`${api}${endpoint}`, {
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers,
-                },
-                ...options,
-            });
+// // --- RESET PASSWORD FUNKSIYALARI ---
+export const sendResetCode = async (email) => {
+  const response = await api.post("/company/send_reset_code", { email });
+  return response.data;
+};
 
-            if (!response.ok) {
-                throw new Error(`API xatosi: ${response.status} - ${response.statusText}`);
-            }
+export const checkResetCode = async (email, code) => {
+  const response = await api.post("/company/check_reset_code", { email, code });
+  return response.data;
+};
 
-            const data = await response.json();
-            return { success: true, data };
-        } catch (error) {
-            console.error('API so\'rovi xatosi:', error);
-            return {
-                success: false,
-                error: error.message,
-                data: [] // Xato bo'lsa ham array qaytarish
-            };
-        }
-    };
+export const confirmResetPassword = async (email, code, newPassword) => {
+  const response = await api.post("/company/confirm_reset_password", {
+    email,
+    code,
+    newPassword,
+  });
+  return response.data;
+};
 
-    export const sendResetCode = async (email) => {
-        try {
-            const response = await api.post('/Company/send-reset-code', { email });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || new Error("Xatolik yuz berdi");
-        }
-    };
-
-    export const checkResetCode = async (email, code) => {
-        try {
-            const response = await api.post('/Company/check-reset-code', { email, code });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || new Error("Kod noto'g'ri");
-        }
-    };
-
-    // 4-sahifa uchun: Parolni tasdiqlash va yangilash
-    export const confirmResetPassword = async (email, code, newPassword) => {
-        try {
-            // Swagger: /Company/confirm-reset-password
-            const response = await api.post('/Company/confirm-reset-password', {
-                email,
-                code,
-                newPassword
-            });
-            return response.data;
-        } catch (error) {
-            throw error.response?.data || new Error("Parolni yangilashda xatolik");
-        }
-    };
-    export { fetchAPI };
-    export default api;
+export default api;

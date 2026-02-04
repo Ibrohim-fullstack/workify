@@ -13,7 +13,8 @@ const Layout = () => {
     "/my-company",
     "/faq",
     "/contacts",
-    "/my-jobs"
+    "/my-jobs",
+    "/settings"
   ];
 
   // Hozirgi yo'l dashboard'ga tegishlimi yoki yo'qmi tekshiramiz
