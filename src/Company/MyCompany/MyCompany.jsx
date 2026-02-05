@@ -5,14 +5,55 @@ import { companyApi, jobApi, applicationApi } from '../../services/api';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
+// --- SKELETON KOMPONENTI ---
+const CompanySkeleton = () => (
+  <div className="p-1 sm:p-2 lg:p-8 bg-[#F9FAFB] min-h-screen animate-pulse">
+    {/* Header Skeleton */}
+    <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 mt-8 md:mt-0">
+      <div className="h-16 bg-white rounded-2xl w-full md:flex-1 shadow-sm"></div>
+      <div className="h-16 bg-gray-200 rounded-2xl w-full md:w-48 shadow-md"></div>
+    </div>
+
+    <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] xl:grid-cols-[380px_1fr] gap-8">
+      {/* Left Column Skeleton */}
+      <div className="bg-white rounded-[2rem] p-6 sm:p-8 shadow-sm h-fit border border-gray-50">
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-28 h-28 sm:w-36 sm:h-36 rounded-full bg-gray-200 mb-4"></div>
+          <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+          <div className="h-4 bg-gray-100 rounded w-1/2"></div>
+        </div>
+        <div className="space-y-4 pt-4 border-t border-gray-50">
+          {[1, 2, 3, 4, 5, 6].map((i) => (
+            <div key={i} className="flex justify-between">
+              <div className="h-4 bg-gray-100 rounded w-1/4"></div>
+              <div className="h-4 bg-gray-200 rounded w-1/2"></div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Right Column Skeleton */}
+      <div className="space-y-8">
+        <div className="h-48 bg-gray-300 rounded-[2rem] shadow-xl"></div>
+        <div className="h-96 bg-white rounded-[2rem] p-10 shadow-sm border border-gray-100">
+          <div className="h-6 bg-gray-200 rounded w-1/4 mb-6"></div>
+          <div className="space-y-3">
+            <div className="h-4 bg-gray-100 rounded w-full"></div>
+            <div className="h-4 bg-gray-100 rounded w-full"></div>
+            <div className="h-4 bg-gray-100 rounded w-3/4"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+);
+
 const MyCompany = () => {
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [company, setCompany] = useState(null);
   const [stats, setStats] = useState({ active: 0, posted: 0, hired: 56 });
   const [formData, setFormData] = useState({});
-  
-  // Yangi rasm tanlanganda vaqtinchalik ko'rsatish uchun state
   const [imagePreview, setImagePreview] = useState(null);
 
   const defaultAvatar = "https://media.istockphoto.com/id/1337144146/vector/default-avatar-profile-icon-vector.jpg?s=612x612&w=0&k=20&c=BIbFwuv7FxTWvh5S3vB6bkT0Qv8Vn8N5Ffseq84ClGI=";
@@ -67,37 +108,36 @@ const MyCompany = () => {
     } catch (error) {
       toast.error("Failed to load company data");
     } finally {
-      setLoading(false);
+      // Effektni ko'rish uchun biroz kechikish (ixtiyoriy)
+      setTimeout(() => setLoading(false), 800);
     }
   };
 
-  // --- RASMNI TANLASH VA O'QISH ---
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
-      // 1. Ekranda ko'rinishi uchun vaqtinchalik URL yaratamiz
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result);
-      };
-      reader.readAsDataURL(file);
+      if (file.size > 2 * 1024 * 1024) {
+        return toast.error("Rasm hajmi 2MB dan oshmasligi kerak");
+      }
 
-      // 2. Faylni darhol serverga yuborish (ixtiyoriy)
-      // Yoki buni handleUpdate ichida formData bilan yuborsangiz ham bo'ladi
+      const targetId = company?.id || formData?.id;
+      const loadToast = toast.loading("Rasm yuklanmoqda...");
+
       try {
-        const imageFormData = new FormData();
-        imageFormData.append('file', file); // API-ga qarab 'image' yoki 'file' kaliti
+        const data = new FormData();
+        data.append('company_name', formData.company_name || '');
+        data.append('profileimg', file);
 
-        // Agar sizda rasmni alohida yuklaydigan API bo'lsa:
-        // const res = await companyApi.uploadImage(imageFormData);
-        // setFormData({ ...formData, profileimg_url: res.data.url });
-        
-        toast.info("Rasm tanlandi. Saqlash tugmasini bosing.");
-        
-        // Bu misolda rasmni formData ichiga saqlab qo'yamiz
-        setFormData(prev => ({ ...prev, profileimg_file: file }));
+        const response = await companyApi.update(targetId, data);
+
+        if (response.status === 200 || response.status === 201) {
+          toast.update(loadToast, { render: "Rasm yangilandi!", type: "success", isLoading: false, autoClose: 2000 });
+          setTimeout(() => {
+            window.location.reload();
+          }, 1000);
+        }
       } catch (err) {
-        toast.error("Rasm yuklashda xatolik");
+        toast.update(loadToast, { render: "Rasm yuklashda xatolik", type: "error", isLoading: false, autoClose: 3000 });
       }
     }
   };
@@ -108,10 +148,7 @@ const MyCompany = () => {
     if (!targetId) return;
 
     try {
-      // Agar rasm fayli bo'lsa, FormData ishlatish kerak bo'lishi mumkin
-      // Hozirgi holatda oddiy JSON yuborilyapti:
       const { created_at, profileimg_file, ...updateData } = formData;
-      
       const response = await companyApi.update(targetId, updateData);
 
       if (response.status === 200 || response.data) {
@@ -133,6 +170,9 @@ const MyCompany = () => {
       toast.error("An error occurred while saving");
     }
   };
+
+  // --- LOADING HOLATI UCHUN SKELETON ---
+  if (loading) return <CompanySkeleton />;
 
   return (
     <div className="p-1 sm:p-2 lg:p-8 bg-[#F9FAFB] min-h-screen font-sans">
@@ -156,18 +196,17 @@ const MyCompany = () => {
           <div className="flex flex-col items-center mb-8">
             <div className="relative w-28 h-28 sm:w-36 sm:h-36 mb-4">
               <img
-                // imagePreview bo'lsa yangi rasmni, bo'lmasa eskisini ko'rsatadi
                 src={imagePreview || formData?.profileimg_url || defaultAvatar}
                 className="w-full h-full rounded-full object-cover border-4 border-gray-50 shadow-md"
                 alt="Profile"
               />
               <label className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-1/2 bg-[#5CB85C] p-3 rounded-full text-white cursor-pointer shadow-lg hover:bg-[#4cae4c] transition-all">
                 <Camera size={20} />
-                <input 
-                    type="file" 
-                    className="hidden" 
-                    accept="image/*" 
-                    onChange={handleImageChange} // Rasm tanlanganda ishlaydi
+                <input
+                  type="file"
+                  className="hidden"
+                  accept="image/*"
+                  onChange={handleImageChange}
                 />
               </label>
             </div>
@@ -188,7 +227,6 @@ const MyCompany = () => {
           </div>
         </div>
 
-        {/* RIGHT COLUMN - Stats and About */}
         <div className="space-y-8 overflow-hidden">
           <div className="bg-gradient-to-br from-[#2B3263] via-[#7B4BA2] to-[#BD4CA1] rounded-[2rem] p-8 sm:p-12 text-white shadow-xl">
             <p className="text-[10px] font-bold uppercase tracking-[0.2em] opacity-70 mb-8 text-center">Dashboard Statistics</p>
@@ -211,7 +249,6 @@ const MyCompany = () => {
         </div>
       </div>
 
-      {/* MODAL */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4 overflow-y-auto">
           <div className="bg-white rounded-[2.5rem] w-full max-w-2xl shadow-2xl relative my-auto">
@@ -255,7 +292,7 @@ const MyCompany = () => {
   );
 };
 
-// Sub-komponentlar (O'zgarishsiz qoldi)
+// --- YORDAMCHI KOMPONENTLAR ---
 const InfoRow = ({ label, value, isLink }) => (
   <div className="flex flex-row justify-between text-sm py-3 border-b border-gray-50 last:border-0">
     <span className="text-gray-400 font-medium">{label}:</span>
