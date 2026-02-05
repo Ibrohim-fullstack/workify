@@ -1,14 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { companyApi, jobApi } from '../../services/api';
+
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, 
   ResponsiveContainer, AreaChart, Area, Tooltip 
 } from 'recharts';
 
-/**
- * 1. FUNKSIYANI TASHQARIDA SAQLAYMIZ
- * Bu ReferenceError xatosini va render paytidagi uzilishlarni oldini oladi
- */
 const getProgressColor = (pct) => {
   if (pct <= 30) return "#FF4D4D";      
   if (pct <= 55) return "#FFD60A";      
@@ -58,35 +55,51 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        let saved = localStorage.getItem("user_info") || sessionStorage.getItem("user_info");
-        if (!saved) {
+        // FAQAT LOCAL STORAGE BILAN ISHLAYMIZ
+        const localData = localStorage.getItem("user_info");
+
+        if (!localData) {
           setLoading(false);
           return;
         }
-        const user = JSON.parse(saved);
+
+        const user = JSON.parse(localData);
         const myId = Number(user.id);
 
+        // API dan ma'lumotlarni olish
         const res = await companyApi.getAll();
         const myData = res.data.find(c => Number(c.id) === myId);
 
-        if (myData) {
-          const storageType = localStorage.getItem("user_info") ? localStorage : sessionStorage;
-          storageType.setItem("user_info", JSON.stringify(myData));
+        // Ma'lumot manbasini aniqlash (API birinchi o'rinda)
+        const targetData = myData || user;
 
-          const fields = [
-            myData.company_name, myData.phone, myData.industry, 
-            myData.country, myData.city, myData.website, myData.about_company
+        if (targetData) {
+          // LocalStorage ni yangilash (agar API dan yangi ma'lumot kelgan bo'lsa)
+          if (myData) {
+            localStorage.setItem("user_info", JSON.stringify(myData));
+          }
+
+          // Foizni hisoblash uchun maydonlar (Rasmda ko'ringan nomlar bo'yicha)
+          const fieldsToVerify = [
+            targetData.company_name,
+            targetData.phone,
+            targetData.industry || targetData.Industry,
+            targetData.country,
+            targetData.city,
+            targetData.website,
+            targetData.about_company
           ];
 
-          const filled = fields.filter(v => 
-            v !== null && v !== undefined && 
-            String(v).trim() !== "" && 
-            String(v).trim().toLowerCase() !== "string"
-          ).length;
+          const filledCount = fieldsToVerify.filter(val => {
+            if (val === null || val === undefined) return false;
+            const str = String(val).trim();
+            return str !== "" && str.toLowerCase() !== "string" && str !== "0";
+          }).length;
 
-          setPercentage(Math.round((filled / 7) * 100));
+          setPercentage(Math.round((filledCount / fieldsToVerify.length) * 100));
         }
 
+        // Grafiklar uchun Jobs ma'lumotlari
         const jobsRes = await jobApi.getAll();
         const myJobs = jobsRes.data.filter(job => 
           Number(job.company_id) === myId || Number(job.ownerId) === myId
@@ -97,7 +110,7 @@ const Dashboard = () => {
         setJobStats(formatData(myJobs, 'week'));
 
       } catch (err) {
-        console.error("Xato:", err);
+        console.error("Dashboard error:", err);
       } finally {
         setLoading(false);
       }
@@ -114,7 +127,6 @@ const Dashboard = () => {
 
   return (
     <div className="p-3 md:p-6 bg-[#F8F9FB] min-h-screen font-['Mulish']">
-      
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 max-w-[1400px] mx-auto gap-4">
         <div className="bg-white px-6 md:px-8 py-4 rounded-lg shadow-sm border border-gray-100 flex items-center w-full sm:flex-grow sm:max-w-[1047px]">
           <h1 className="text-[18px] md:text-[20px] font-bold text-[#202430]">Dashboard</h1>
@@ -127,22 +139,19 @@ const Dashboard = () => {
       <div className="max-w-[1400px] mx-auto space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           
-          {/* PROFILE COMPLETION BOX */}
           <div className="lg:col-span-4 bg-gradient-to-br from-[#163D5C] to-[#CA5ECA] p-6 md:p-8 rounded-[20px] text-white flex flex-col items-center justify-center shadow-xl h-[350px] md:h-[400px]">
             <h3 className="text-[18px] md:text-[20px] font-bold mb-6 text-center w-full">Profile completed</h3>
             
             <div className="relative flex items-center justify-center w-[160px] h-[160px] md:w-[200px] md:h-[200px]">
               <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
                 <circle cx="100" cy="100" r={radius} stroke="rgba(255,255,255,0.1)" strokeWidth="20" fill="transparent" />
-                
-                {/* TO'G'RILANGAN CIRCLE: Yopilish qavsi va funksiya tekshiruvi bilan */}
                 <circle 
                   cx="100" cy="100" r={radius} 
                   stroke={getProgressColor(displayPercentage)} 
                   strokeWidth="20" 
                   fill="transparent" 
                   strokeDasharray={circumference} 
-                  strokeDashoffset={offset} 
+                  strokeDashoffset={isNaN(offset) ? circumference : offset} 
                   strokeLinecap="round"
                   className="transition-all duration-1000 ease-in-out"
                 />
@@ -157,12 +166,12 @@ const Dashboard = () => {
           <div className="lg:col-span-8 bg-white p-4 md:p-6 rounded-[20px] border border-[#E9E9E9] shadow-sm flex flex-col items-center h-[400px]">
             <h3 className="text-[16px] md:text-[18px] font-bold text-[#202430] mb-4">Profile views</h3>
             <div className="bg-[#F8F8FD] p-1 rounded-xl flex items-center relative mb-6 w-full max-w-[420px]">
-               <div className="absolute bg-white shadow-md rounded-lg transition-all duration-500 ease-in-out"
+                <div className="absolute bg-white shadow-md rounded-lg transition-all duration-500 ease-in-out"
                   style={{ width: 'calc(50% - 4px)', height: 'calc(100% - 8px)', left: profileViewTab === 'week' ? '4px' : 'calc(50%)' }} />
-               <button onClick={() => { setProfileViewTab('week'); setProfileStats(formatData(rawJobs, 'week')); }}
-                 className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${profileViewTab === 'week' ? 'text-[#202430]' : 'text-gray-400'}`}>This week</button>
-               <button onClick={() => { setProfileViewTab('month'); setProfileStats(formatData(rawJobs, 'month')); }}
-                 className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${profileViewTab === 'month' ? 'text-[#202430]' : 'text-gray-400'}`}>This month</button>
+                <button onClick={() => { setProfileViewTab('week'); setProfileStats(formatData(rawJobs, 'week')); }}
+                  className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${profileViewTab === 'week' ? 'text-[#202430]' : 'text-gray-400'}`}>This week</button>
+                <button onClick={() => { setProfileViewTab('month'); setProfileStats(formatData(rawJobs, 'month')); }}
+                  className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${profileViewTab === 'month' ? 'text-[#202430]' : 'text-gray-400'}`}>This month</button>
             </div>
             <div className="h-[220px] md:h-[240px] w-full">
               <ResponsiveContainer width="100%" height="100%">
@@ -185,16 +194,16 @@ const Dashboard = () => {
         </div>
 
         <div className="bg-white p-4 md:p-8 rounded-[20px] border border-[#E9E9E9] shadow-sm flex flex-col items-center">
-           <h3 className="text-[16px] md:text-[18px] font-bold text-[#202430] mb-6">Job posts</h3>
-           <div className="bg-[#F8F8FD] p-1 rounded-xl flex items-center relative mb-8 w-full max-w-[420px]">
-               <div className="absolute bg-white shadow-md rounded-lg transition-all duration-500 ease-in-out"
+            <h3 className="text-[16px] md:text-[18px] font-bold text-[#202430] mb-6">Job posts</h3>
+            <div className="bg-[#F8F8FD] p-1 rounded-xl flex items-center relative mb-8 w-full max-w-[420px]">
+                <div className="absolute bg-white shadow-md rounded-lg transition-all duration-500 ease-in-out"
                   style={{ width: 'calc(50% - 4px)', height: 'calc(100% - 8px)', left: jobPostTab === 'week' ? '4px' : 'calc(50%)' }} />
-               <button onClick={() => { setJobPostTab('week'); setJobStats(formatData(rawJobs, 'week')); }}
-                 className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${jobPostTab === 'week' ? 'text-[#202430]' : 'text-gray-400'}`}>This week</button>
-               <button onClick={() => { setJobPostTab('month'); setJobStats(formatData(rawJobs, 'month')); }}
-                 className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${jobPostTab === 'month' ? 'text-[#202430]' : 'text-gray-400'}`}>This month</button>
+                <button onClick={() => { setJobPostTab('week'); setJobStats(formatData(rawJobs, 'week')); }}
+                  className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${jobPostTab === 'week' ? 'text-[#202430]' : 'text-gray-400'}`}>This week</button>
+                <button onClick={() => { setJobPostTab('month'); setJobStats(formatData(rawJobs, 'month')); }}
+                  className={`z-10 font-bold py-2 text-[13px] md:text-[14px] flex-1 ${jobPostTab === 'month' ? 'text-[#202430]' : 'text-gray-400'}`}>This month</button>
             </div>
-           <div className="h-[250px] md:h-[300px] w-full">
+            <div className="h-[250px] md:h-[300px] w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={jobStats} margin={{ top: 5, right: 35, left: -15, bottom: 0 }}>
                   <defs>
@@ -210,7 +219,7 @@ const Dashboard = () => {
                   <Area type="monotone" dataKey="count" stroke="#5ABF89" strokeWidth={3} fill="url(#colorJob)" />
                 </AreaChart>
               </ResponsiveContainer>
-           </div>
+            </div>
         </div>
       </div>
     </div>
