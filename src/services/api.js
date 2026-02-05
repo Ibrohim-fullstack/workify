@@ -172,7 +172,7 @@ export const confirmResetPassword = async (email, code, newPassword) => {
   return await api.post("/company/confirm-reset-password", {
     email: email.trim(),
     code: String(code).trim(),
-    new_password: newPassword  
+    new_password: newPassword  // <--- Mana shu kalit so'z 400 xatosini yechimi!
   });
 };
 
