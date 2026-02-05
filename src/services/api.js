@@ -154,7 +154,6 @@ export const UZBEK_REGIONS = [
 // --- RESET PASSWORD FUNKSIYALARI ---
 
 export const sendResetCode = async (email) => {
-  // URL rasmga ko'ra: /api/company/send-reset-code
   const response = await api.post("/company/send-reset-code", {
     email: email.trim().toLowerCase()
   });
@@ -162,7 +161,6 @@ export const sendResetCode = async (email) => {
 };
 
 export const checkResetCode = async (email, code) => {
-  // URL rasmga ko'ra: /api/company/check-reset-code
   const response = await api.post("/company/check-reset-code", {
     email: email.trim().toLowerCase(),
     code: String(code).trim()
