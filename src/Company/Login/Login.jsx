@@ -66,16 +66,16 @@ function SignIn() {
             const { token, company, message } = response.data;
 
             if (token) {
-                // 1. Qayerga saqlashni aniqlaymiz
-                const storage = rememberMe ? localStorage : sessionStorage;
+                // DOIM localStorage ga saqlash
+                const storage = localStorage;
 
-                // 2. Avval barcha eski qoldiqlarni tozalaymiz
+                // Avval barcha eski qoldiqlarni tozalaymiz
                 localStorage.removeItem("token");
                 sessionStorage.removeItem("token");
                 localStorage.removeItem("user_info");
                 sessionStorage.removeItem("user_info");
 
-                // 3. Yangi ma'lumotlarni yozamiz
+                // Yangi ma'lumotlarni yozamiz
                 storage.setItem("token", token);
                 storage.setItem("user_info", JSON.stringify(company));
 
@@ -95,8 +95,7 @@ function SignIn() {
             setLoading(false);
         }
     };
-
-    {/* Toaster shu yerda bo'lishi kerak */ }
+    
     <Toaster position="top-right" />
 
     return (
