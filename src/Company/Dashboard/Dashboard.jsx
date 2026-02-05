@@ -6,6 +6,41 @@ import {
   ResponsiveContainer, AreaChart, Area, Tooltip 
 } from 'recharts';
 
+// --- SKELETON KOMPONENTI ---
+const DashboardSkeleton = () => (
+  <div className="p-3 md:p-6 bg-[#F8F9FB] min-h-screen animate-pulse">
+    {/* Header Skeleton */}
+    <div className="flex flex-col sm:flex-row justify-between items-center mb-6 max-w-[1400px] mx-auto gap-4">
+      <div className="h-16 bg-white rounded-lg w-full sm:flex-grow sm:max-w-[1047px] shadow-sm"></div>
+      <div className="h-16 bg-gray-200 rounded-lg w-full sm:w-48 shadow-md"></div>
+    </div>
+
+    <div className="max-w-[1400px] mx-auto space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        {/* Left Card Skeleton (Circle) */}
+        <div className="lg:col-span-4 bg-gray-300 rounded-[20px] h-[350px] md:h-[400px] flex flex-col items-center justify-center p-8">
+           <div className="h-6 bg-gray-400 rounded w-1/2 mb-8"></div>
+           <div className="w-[160px] h-[160px] md:w-[200px] md:h-[200px] rounded-full bg-gray-400"></div>
+        </div>
+        
+        {/* Right Card Skeleton (Bar Chart) */}
+        <div className="lg:col-span-8 bg-white rounded-[20px] h-[400px] p-6 border border-gray-100 shadow-sm flex flex-col items-center">
+          <div className="h-6 bg-gray-100 rounded w-1/4 mb-6"></div>
+          <div className="h-10 bg-gray-50 rounded-xl w-full max-w-[420px] mb-8"></div>
+          <div className="w-full flex-grow bg-gray-50 rounded-lg"></div>
+        </div>
+      </div>
+
+      {/* Bottom Card Skeleton (Area Chart) */}
+      <div className="bg-white p-8 rounded-[20px] h-[450px] border border-gray-100 shadow-sm flex flex-col items-center">
+        <div className="h-6 bg-gray-100 rounded w-1/6 mb-8"></div>
+        <div className="h-10 bg-gray-50 rounded-xl w-full max-w-[420px] mb-10"></div>
+        <div className="w-full flex-grow bg-gray-50 rounded-lg"></div>
+      </div>
+    </div>
+  </div>
+);
+
 const getProgressColor = (pct) => {
   if (pct <= 30) return "#FF4D4D";      
   if (pct <= 55) return "#FFD60A";      
@@ -55,9 +90,7 @@ const Dashboard = () => {
   useEffect(() => {
     const fetchAllData = async () => {
       try {
-        // FAQAT LOCAL STORAGE BILAN ISHLAYMIZ
         const localData = localStorage.getItem("user_info");
-
         if (!localData) {
           setLoading(false);
           return;
@@ -66,20 +99,16 @@ const Dashboard = () => {
         const user = JSON.parse(localData);
         const myId = Number(user.id);
 
-        // API dan ma'lumotlarni olish
         const res = await companyApi.getAll();
         const myData = res.data.find(c => Number(c.id) === myId);
 
-        // Ma'lumot manbasini aniqlash (API birinchi o'rinda)
         const targetData = myData || user;
 
         if (targetData) {
-          // LocalStorage ni yangilash (agar API dan yangi ma'lumot kelgan bo'lsa)
           if (myData) {
             localStorage.setItem("user_info", JSON.stringify(myData));
           }
 
-          // Foizni hisoblash uchun maydonlar (Rasmda ko'ringan nomlar bo'yicha)
           const fieldsToVerify = [
             targetData.company_name,
             targetData.phone,
@@ -99,7 +128,6 @@ const Dashboard = () => {
           setPercentage(Math.round((filledCount / fieldsToVerify.length) * 100));
         }
 
-        // Grafiklar uchun Jobs ma'lumotlari
         const jobsRes = await jobApi.getAll();
         const myJobs = jobsRes.data.filter(job => 
           Number(job.company_id) === myId || Number(job.ownerId) === myId
@@ -112,7 +140,8 @@ const Dashboard = () => {
       } catch (err) {
         console.error("Dashboard error:", err);
       } finally {
-        setLoading(false);
+        // Ma'lumotlar tez kelsa ham skelet ko'rinishi uchun biroz kechikish (ixtiyoriy)
+        setTimeout(() => setLoading(false), 800);
       }
     };
     fetchAllData();
@@ -123,7 +152,8 @@ const Dashboard = () => {
   const displayPercentage = Math.min(percentage, 100);
   const offset = circumference - (displayPercentage / 100) * circumference;
 
-  if (loading) return <div className="p-10 text-center">Loading...</div>;
+  // --- LOADING BO'LSA SKELETNI QAYTARISH ---
+  if (loading) return <DashboardSkeleton />;
 
   return (
     <div className="p-3 md:p-6 bg-[#F8F9FB] min-h-screen font-['Mulish']">
@@ -138,10 +168,8 @@ const Dashboard = () => {
 
       <div className="max-w-[1400px] mx-auto space-y-6">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
           <div className="lg:col-span-4 bg-gradient-to-br from-[#163D5C] to-[#CA5ECA] p-6 md:p-8 rounded-[20px] text-white flex flex-col items-center justify-center shadow-xl h-[350px] md:h-[400px]">
             <h3 className="text-[18px] md:text-[20px] font-bold mb-6 text-center w-full">Profile completed</h3>
-            
             <div className="relative flex items-center justify-center w-[160px] h-[160px] md:w-[200px] md:h-[200px]">
               <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
                 <circle cx="100" cy="100" r={radius} stroke="rgba(255,255,255,0.1)" strokeWidth="20" fill="transparent" />

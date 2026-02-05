@@ -25,14 +25,13 @@ const CompanySkeleton = () => (
         <div className="space-y-4 pt-4 border-t border-gray-50">
           {[1, 2, 3, 4, 5, 6].map((i) => (
             <div key={i} className="flex justify-between">
-              <div className="h-4 bg-gray-100 rounded w-1/4"></div>
+              <div className="h-5 bg-gray-100 rounded w-1/4"></div>
               <div className="h-4 bg-gray-200 rounded w-1/2"></div>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Right Column Skeleton */}
       <div className="space-y-8">
         <div className="h-48 bg-gray-300 rounded-[2rem] shadow-xl"></div>
         <div className="h-96 bg-white rounded-[2rem] p-10 shadow-sm border border-gray-100">

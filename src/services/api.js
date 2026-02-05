@@ -78,7 +78,7 @@ export const companyApi = {
   },
 
   login: (data) => api.post("/company/login", data),
-  getProfile: () => api.get("/company/profile"),
+  // getProfile: () => api.get("/company/profile"),
   getAll: () => api.get("/company"),
   getById: (id) => api.get(`/company/${id}`),
   search: (query) => api.get(`/company/search?query=${query}`),
