@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { jwtDecode } from 'jwt-decode';
 import { Pencil, ShieldCheck, X, Camera } from 'lucide-react';
 import { companyApi, jobApi, applicationApi } from '../../services/api';
+// Toast xabarlari uchun
+import toast, { Toaster } from 'react-hot-toast';
 
 const MyCompany = () => {
   const [loading, setLoading] = useState(true);
@@ -20,10 +22,7 @@ const MyCompany = () => {
     setLoading(true);
     try {
       const token = localStorage.getItem('token') || sessionStorage.getItem('token');
-      
-      if (!token) {
-        return setLoading(false);
-      }
+      if (!token) return setLoading(false);
 
       const decoded = jwtDecode(token);
       const companyId = decoded.id;
@@ -74,12 +73,14 @@ const MyCompany = () => {
     const targetId = company?.id || formData?.id;
     if (!targetId) return;
 
+    // Yuklanish holatini toast orqali ko'rsatish
+    const loadingToast = toast.loading("Saqlanmoqda...");
+
     try {
       const { created_at, ...updateData } = formData;
       const response = await companyApi.update(targetId, updateData);
 
       if (response.status === 200 || response.data) {
-        // --- YANGILANISHNI REAL-TIME QILISH UCHUN QO'SHILDI ---
         const existingInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
         const updatedUserInfo = {
           ...existingInfo,
@@ -88,29 +89,56 @@ const MyCompany = () => {
           profileimg_url: updateData.profileimg_url || existingInfo.profileimg_url
         };
         localStorage.setItem('user_info', JSON.stringify(updatedUserInfo));
-        
-        // Sidebar va Headerga o'zgarish haqida xabar berish
         window.dispatchEvent(new Event('storage'));
-        // -----------------------------------------------------
 
         setIsModalOpen(false);
         fetchData();
-        alert("Ma'lumotlar muvaffaqiyatli saqlandi!");
+        // Toast muvaffaqiyatli
+        toast.success("Ma'lumotlar muvaffaqiyatli yangilandi!", { id: loadingToast });
       }
     } catch (error) {
-      alert("Xatolik yuz berdi");
+      toast.error("Xatolik yuz berdi", { id: loadingToast });
     }
   };
 
-  if (loading) return <div className="flex justify-center items-center h-screen animate-pulse font-bold text-[#163D5C]">Ma'lumotlar yuklanmoqda... ⏳</div>;
+  // --- SKELETON KOMPONENTI ---
+  if (loading) {
+    return (
+      <div className="p-3 sm:p-6 bg-[#F9FAFB] min-h-screen animate-pulse">
+        <Toaster position="top-center" />
+        <div className="h-14 bg-white rounded-xl mb-6 shadow-sm w-full max-w-sm"></div>
+        <div className="grid grid-cols-1 lg:grid-cols-[300px_1fr] xl:grid-cols-[350px_1fr] gap-6">
+          <div className="bg-white rounded-[2rem] h-[500px] p-8 shadow-sm">
+            <div className="w-32 h-32 rounded-full bg-gray-200 mx-auto mb-6"></div>
+            <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto mb-4"></div>
+            <div className="space-y-4 pt-4 border-t border-gray-50">
+              {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-4 bg-gray-100 rounded w-full"></div>)}
+            </div>
+          </div>
+          <div className="space-y-6">
+            <div className="bg-gray-200 rounded-[2rem] h-48 w-full"></div>
+            <div className="bg-white rounded-[2rem] h-64 p-8">
+              <div className="h-6 bg-gray-200 rounded w-1/4 mb-4"></div>
+              <div className="h-24 bg-gray-100 rounded w-full"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-3 sm:p-6 bg-[#F9FAFB] min-h-screen font-sans">
+      <Toaster position="top-center" reverseOrder={false} />
+
       <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4 mt-12 md:mt-0">
         <h1 className="text-xl sm:text-2xl font-bold text-[#4B5563] bg-white px-4 py-3 rounded-xl shadow-sm w-full sm:flex-1 text-center sm:text-left">
           Company profile
         </h1>
-        <button className="bg-[#5CB85C] hover:bg-[#4cae4c] text-white w-full sm:w-auto px-8 py-3 rounded-xl font-bold shadow-md active:scale-95 transition-all">
+        <button
+          style={{ background: 'linear-gradient(95.14deg, #1D3F61 0%, #C25DC5 100%)' }}
+          className="text-white w-full sm:w-auto px-10 py-4 rounded-lg font-bold hover:opacity-90 active:scale-95 transition-all min-w-[180px] shadow-md border-none"
+        >
           Post a Job
         </button>
       </div>
@@ -238,6 +266,7 @@ const MyCompany = () => {
   );
 };
 
+// Yordamchi komponentlar (o'zgarishsiz)
 const InfoRow = ({ label, value, isLink }) => (
   <div className="flex flex-row justify-between text-[11px] sm:text-sm py-2 border-b border-gray-50 text-left">
     <span className="text-gray-400 font-medium">{label}:</span>
