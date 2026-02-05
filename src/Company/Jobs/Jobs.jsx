@@ -2,11 +2,14 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { jobApi } from '../../services/api';
 import { formatDistanceToNow } from 'date-fns';
+import { HiOutlineLocationMarker } from "react-icons/hi";
 
 function Jobs() {
     const [jobs, setJobs] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    // 2. Expand holati uchun state
+    const [expandedJobs, setExpandedJobs] = useState({});
 
     useEffect(() => {
         const fetchJobs = async () => {
@@ -24,6 +27,10 @@ function Jobs() {
         fetchJobs();
     }, []);
 
+    const toggleExpand = (id) => {
+        setExpandedJobs(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
     const formatDate = (dateString) => {
         try {
             if (!dateString) return 'recently';
@@ -40,7 +47,7 @@ function Jobs() {
         return [];
     };
 
-    // --- SKELETON CARD (Vakansiya yuklanayotgan paytda) ---
+    // --- SKELETON CARD ---
     const JobSkeleton = () => (
         <div className="bg-white border border-gray-100 rounded-xl shadow-md overflow-hidden animate-pulse">
             <div className="p-5 md:p-8">
@@ -58,7 +65,6 @@ function Jobs() {
                 <div className="h-6 bg-gray-100 rounded w-3/4"></div>
                 <div className="h-4 bg-gray-100 rounded w-full"></div>
                 <div className="flex gap-2">
-                    <div className="h-8 bg-gray-100 rounded w-20"></div>
                     <div className="h-8 bg-gray-100 rounded w-20"></div>
                     <div className="h-8 bg-gray-100 rounded w-20"></div>
                 </div>
@@ -86,12 +92,13 @@ function Jobs() {
                 {/* JOBS LIST */}
                 <div className="space-y-5">
                     {loading ? (
-                        // Yuklanayotgan paytda 4 ta soxta ish o'rni chiqadi
                         [1, 2, 3, 4].map(i => <JobSkeleton key={i} />)
                     ) : (
                         jobs.map((job) => {
                             const skills = parseSkills(job.skils);
                             const company = job.company || {};
+                            const isExpanded = expandedJobs[job.id];
+                            const descriptionText = job.description || "Ma'lumot berilmagan.";
 
                             return (
                                 <div key={job.id} className="bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
@@ -100,7 +107,7 @@ function Jobs() {
                                     <div className="p-5 md:p-8">
                                         <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                                             <div className="flex items-center gap-4 md:gap-5">
-                                                {/* Logo */}
+                                                {/* Logo (O'zgarishsiz) */}
                                                 <div className="w-12 h-12 md:w-16 md:h-16 bg-[#00A193] rounded-full flex items-center justify-center overflow-hidden shrink-0 text-white font-bold">
                                                     {company.profileimg_url ? (
                                                         <img src={company.profileimg_url} alt="logo" className="w-full h-full object-cover" />
@@ -128,10 +135,9 @@ function Jobs() {
 
                                             {/* Meta data */}
                                             <div className="flex flex-row md:flex-col justify-between md:items-end items-center gap-1.5 w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
-                                                <div className="flex items-center text-[#4b5563] text-sm md:text-lg font-semibold">
-                                                    <svg className="w-4 h-4 mr-1 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                    </svg>
+                                                {/* 3. LOKATSIYA IKONKASI */}
+                                                <div className="flex items-center gap-1 text-[#4b5563] text-sm md:text-lg font-semibold">
+                                                    <HiOutlineLocationMarker className="text-[#8b8d8f]" size={22} />
                                                     {job.location || 'Tashkent'}
                                                 </div>
                                                 <div className="flex flex-col md:items-end items-start">
@@ -146,7 +152,7 @@ function Jobs() {
 
                                     <div className="border-t border-gray-100 mx-6"></div>
 
-                                    {/* 2. MIDDLE SECTION */}
+                                    {/* 2. MIDDLE SECTION (MORE/LESS bilan) */}
                                     <div className="p-5 md:p-6">
                                         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-2">
                                             <h2 className="text-[18px] md:text-[22px] font-bold text-[#515151] tracking-tight">
@@ -156,12 +162,25 @@ function Jobs() {
                                                 ${job.salary_min}-${job.salary_max}
                                             </div>
                                         </div>
-                                        <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
-                                            {job.description || "Ma'lumot berilmagan."}
-                                        </p>
+                                        {/* 4. DESCRIPTION SCROLLABLE */}
+                                        <div className="relative">
+                                            <div
+                                                className={`text-[#484f57] text-[15px] md:text-[18px] leading-relaxed transition-all duration-300 ${isExpanded ? 'max-h-[150px] overflow-y-auto pr-2' : 'line-clamp-2'
+                                                    }`}
+                                            >
+                                                {descriptionText}
+                                            </div>
+                                            {descriptionText.length > 150 && (
+                                                <button
+                                                    onClick={() => toggleExpand(job.id)}
+                                                    className="text-[#1D3D54] font-bold text-sm mt-1 hover:underline cursor-pointer"
+                                                >
+                                                    {isExpanded ? "show less" : "...more"}
+                                                </button>
+                                            )}
+                                        </div>
                                     </div>
 
-                                    {/* 3. BOTTOM SECTION */}
                                     <div className="p-5 md:p-6 pt-0">
                                         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-end gap-6">
                                             <div className="w-full">
@@ -194,6 +213,12 @@ function Jobs() {
                         })
                     )}
                 </div>
+
+                {jobs.length === 0 && !loading && (
+                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300 mt-5">
+                        <p className="text-gray-400 font-medium">Hozircha bo'sh ish o'rinlari mavjud emas.</p>
+                    </div>
+                )}
             </div>
         </div>
     );

@@ -1,18 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { talentApi } from '../../services/api';
+import { HiOutlineLocationMarker } from "react-icons/hi";
 
 function Talents() {
     const [talents, setTalents] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [expandedAbout, setExpandedAbout] = useState({});
 
     useEffect(() => {
         const fetchTalents = async () => {
             try {
                 setLoading(true);
                 const response = await talentApi.getAll();
-                // BU YERDA: || operatori qo'shildi
                 setTalents(response.data || []);
             } catch (err) {
                 console.error('API Error:', err);
@@ -24,10 +25,13 @@ function Talents() {
         fetchTalents();
     }, []);
 
+    const toggleExpand = (id) => {
+        setExpandedAbout(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
     const formatCount = (count) => new Intl.NumberFormat('de-DE').format(count);
 
     const formatPrice = (price) => {
-        // BU YERDA: || operatori qo'shildi
         const value = price || 0;
         return new Intl.NumberFormat('en-US', {
             style: 'currency',
@@ -47,7 +51,6 @@ function Talents() {
     const getInitials = (firstName, lastName) => {
         const f = firstName ? firstName.charAt(0).toUpperCase() : '';
         const l = lastName ? lastName.charAt(0).toUpperCase() : '';
-        // BU YERDA: || operatori qo'shildi
         return (f + l) || '?';
     };
 
@@ -97,6 +100,9 @@ function Talents() {
                     ) : (
                         talents.map((talent) => {
                             const skills = parseSkills(talent.skils);
+                            const isExpanded = expandedAbout[talent.id];
+                            const aboutText = talent.about || "Experience and passion in building great products...";
+
                             return (
                                 <div key={talent.id} className="bg-white border border-gray-100 rounded-xl shadow-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
                                     <div className="p-5 md:p-7">
@@ -130,8 +136,10 @@ function Talents() {
                                                     </p>
                                                 </div>
                                             </div>
+
                                             <div className="flex flex-row md:flex-col justify-between items-center md:items-end w-full md:w-auto border-t md:border-t-0 pt-4 md:pt-0">
-                                                <div className="flex items-center text-[#4b5563] text-sm md:text-lg font-semibold">
+                                                <div className="flex items-center gap-1 text-[#4b5563] text-sm md:text-lg font-semibold">
+                                                    <HiOutlineLocationMarker className="text-[#8b8d8f]" size={22}/>
                                                     {talent.city || talent.location || "Uzbekistan"}
                                                 </div>
                                                 <div className="text-[18px] md:text-[25px] font-bold text-[#343434] mt-2">
@@ -139,10 +147,22 @@ function Talents() {
                                                 </div>
                                             </div>
                                         </div>
+
                                         <div className="mt-6">
-                                            <p className="text-[#484f57] text-[15px] md:text-[18px] leading-relaxed line-clamp-2">
-                                                {talent.about || "Experience and passion in building great products..."}
-                                            </p>
+                                            <div
+                                                className={`text-[#484f57] text-[15px] md:text-[18px] leading-relaxed transition-all duration-300 ${isExpanded ? 'max-h-[150px] overflow-y-auto pr-2' : 'line-clamp-2'
+                                                    }`}
+                                            >
+                                                {aboutText}
+                                            </div>
+                                            {aboutText.length > 120 && (
+                                                <button
+                                                    onClick={() => toggleExpand(talent.id)}
+                                                    className="text-[#1D3D54] font-bold text-sm mt-1 hover:underline cursor-pointer"
+                                                >
+                                                    {isExpanded ? "show less" : "...more"}
+                                                </button>
+                                            )}
                                         </div>
                                     </div>
 
@@ -181,7 +201,7 @@ function Talents() {
                 </div>
 
                 {talents.length === 0 && !loading && (
-                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300">
+                    <div className="text-center py-20 bg-white rounded-xl border border-dashed border-gray-300 mt-5">
                         <p className="text-gray-400 font-medium">Hozircha talentlar mavjud emas.</p>
                     </div>
                 )}
