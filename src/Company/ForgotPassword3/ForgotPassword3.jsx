@@ -1,86 +1,64 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { checkResetCode } from "../../services/api";
+import { confirmResetPassword } from "../../services/api"; // API funksiyangiz
 import { toast } from 'react-toastify';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
-const ForgotPassword3 = () => {
+const ForgotPasswordCombined = () => {
     const [code, setCode] = useState(['', '', '', '', '', '']);
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
+    const [showPass, setShowPass] = useState(false);
     const [timeLeft, setTimeLeft] = useState(300);
     const [loading, setLoading] = useState(false);
     const [isExpired, setIsExpired] = useState(false);
-    const [isError, setIsError] = useState(false); // Xatolik holati uchun
-    const inputRefs = useRef([]);
+    const [isError, setIsError] = useState(false);
 
+    const inputRefs = useRef([]);
     const navigate = useNavigate();
     const location = useLocation();
     const email = location.state?.email || "";
 
-    const handleBack = () => {
-        navigate('/forgot-password-2', { state: { email } });
-    };
-
+    // Timer sozlamalari
     useEffect(() => {
-        const savedTime = localStorage.getItem(`resetTimer_${email}`);
-        const savedStartTime = localStorage.getItem(`resetStartTime_${email}`);
-
-        if (savedTime && savedStartTime) {
-            const currentTime = Math.floor(Date.now() / 1000);
-            const elapsedTime = currentTime - parseInt(savedStartTime);
-            const remainingTime = parseInt(savedTime) - elapsedTime;
-
-            if (remainingTime > 0) {
-                setTimeLeft(remainingTime);
-            } else {
-                setTimeLeft(0);
-                setIsExpired(true);
-            }
-        } else {
-            const startTime = Math.floor(Date.now() / 1000);
-            localStorage.setItem(`resetTimer_${email}`, '300');
-            localStorage.setItem(`resetStartTime_${email}`, startTime.toString());
-        }
-    }, [email]);
-
-    useEffect(() => {
-        if (timeLeft <= 0) {
-            setIsExpired(true);
-            localStorage.removeItem(`resetTimer_${email}`);
-            localStorage.removeItem(`resetStartTime_${email}`);
+        if (!email) {
+            toast.warn("Email topilmadi, boshidan boshlang.");
+            navigate('/forgot-password-1');
             return;
         }
 
         const timer = setInterval(() => {
             setTimeLeft((prev) => {
-                const newTime = prev - 1;
-                if (newTime % 10 === 0) {
-                    localStorage.setItem(`resetTimer_${email}`, newTime.toString());
+                if (prev <= 1) {
+                    clearInterval(timer);
+                    setIsExpired(true);
+                    return 0;
                 }
-                return newTime;
+                return prev - 1;
             });
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [timeLeft, email]);
+    }, [email, navigate]);
 
+    // CTRL + V (Paste) funksiyasi
     const handlePaste = (e) => {
         e.preventDefault();
-        if (isExpired) return;
-        const pastedText = e.clipboardData.getData('text/plain');
+        const pastedText = e.clipboardData.getData('text/plain').trim();
         if (pastedText.length === 6 && /^\d+$/.test(pastedText)) {
-            const newCode = pastedText.split('').slice(0, 6);
+            const newCode = pastedText.split('');
             setCode(newCode);
-            setIsError(false); // Paste qilinganda xatoni tozalash
+            setIsError(false);
             inputRefs.current[5].focus();
         }
     };
 
     const handleChange = (index, value) => {
-        if (isExpired || isNaN(value)) return;
-
-        setIsError(false); // Raqam o'zgarganda qizil rangni yo'qotish
+        if (isNaN(value)) return;
         const newCode = [...code];
         newCode[index] = value.substring(value.length - 1);
         setCode(newCode);
+        setIsError(false);
 
         if (value && index < 5) {
             inputRefs.current[index + 1].focus();
@@ -93,117 +71,129 @@ const ForgotPassword3 = () => {
         }
     };
 
-    const handleSubmit = async () => {
-        if (isExpired) {
-            toast.error("Vaqt tugagan!");
-            return;
-        }
+    const handleSubmit = async (e) => {
+        e.preventDefault();
         const fullCode = code.join('');
+
+        // Validatsiya
         if (fullCode.length < 6) {
-            toast.info("Kodni to'liq kiriting");
-            setIsError(true); // To'liq kiritilmasa ham qizartiramiz
+            toast.error("Tasdiqlash kodini to'liq kiriting!");
+            setIsError(true);
             return;
         }
+        if (newPassword !== confirmPassword) {
+            toast.error("Parollar mos kelmadi!");
+            return;
+        }
+        if (newPassword.length < 6) {
+            toast.error("Parol kamida 6 ta belgi bo'lsin!");
+            return;
+        }
+
         setLoading(true);
         try {
-            await checkResetCode(email, fullCode);
+            // SERVERGA YUBORILADIGAN OBYEKT:
+            // { email: "...", code: "...", newPassword: "..." }
+            await confirmResetPassword(email, fullCode, newPassword);
+
+            toast.success("Parol muvaffaqiyatli yangilandi!");
+
+            // Tozalash
             localStorage.removeItem(`resetTimer_${email}`);
             localStorage.removeItem(`resetStartTime_${email}`);
-            navigate('/forgot-password-4', { state: { email, code: fullCode } });
+
+            setTimeout(() => navigate('/login'), 2000);
         } catch (err) {
-            setIsError(true); // API xato bersa qizartiramiz
-            toast.error("Kod noto'g'ri!");
+            setIsError(true);
+            toast.error(err.response?.data?.message || "Kod yoki ma'lumotlar noto'g'ri!");
         } finally {
             setLoading(false);
         }
     };
 
-    const handleRequestNewCode = () => {
-        const startTime = Math.floor(Date.now() / 1000);
-        localStorage.setItem(`resetTimer_${email}`, '300');
-        localStorage.setItem(`resetStartTime_${email}`, startTime.toString());
-        setTimeLeft(300);
-        setIsExpired(false);
-        setIsError(false);
-        setCode(['', '', '', '', '', '']);
-        toast.info("Yangi kod yuborildi!");
-    };
-
     return (
-        <div className="flex flex-col items-center justify-center min-h-[70vh] bg-white font-sans p-4 pt-10">
-            <div className="w-full max-w-[600px] px-4 text-center">
+        <div className="flex flex-col items-center justify-center min-h-[80vh] bg-white p-4">
+            <div className="w-full max-w-[500px] px-6 py-8 shadow-2xl rounded-3xl border border-gray-100 text-center">
+                <h1 className="text-[28px] font-bold text-[#1e3a5a] mb-2">Reset Password</h1>
+                <p className="text-gray-500 mb-8 text-sm">{email}</p>
 
-                <h1 className="text-[26px] md:text-[32px] font-bold text-[#1e3a5a] mb-8 md:mb-10 tracking-tight">
-                    Reset your password
-                </h1>
+                <form onSubmit={handleSubmit} className="space-y-6">
+                    {/* OTP INPUTS */}
+                    <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-3 text-left">Verification Code</label>
+                        <div className="flex justify-between gap-2" onPaste={handlePaste}>
+                            {code.map((num, idx) => (
+                                <input
+                                    key={idx}
+                                    ref={(el) => (inputRefs.current[idx] = el)}
+                                    type="text"
+                                    className={`w-full h-[55px] border-2 rounded-xl text-center text-xl font-bold transition-all focus:outline-none ${isError ? 'border-red-500' : 'border-gray-200 focus:border-[#1e3a5a]'
+                                        }`}
+                                    value={num}
+                                    onChange={(e) => handleChange(idx, e.target.value)}
+                                    onKeyDown={(e) => handleKeyDown(idx, e)}
+                                    disabled={isExpired}
+                                />
+                            ))}
+                        </div>
+                        <div className="mt-2 text-right text-xs font-mono">
+                            Time left: <span className={isExpired ? "text-red-500" : "text-blue-600"}>
+                                {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                            </span>
+                        </div>
+                    </div>
 
-                {/* CODE INPUTS */}
-                <div
-                    className="flex justify-center gap-2 md:gap-3 mb-8"
-                    onPaste={handlePaste}
-                >
-                    {code.map((num, idx) => (
+                    {/* NEW PASSWORD */}
+                    <div className="space-y-4">
+                        <div className="relative">
+                            <input
+                                type={showPass ? "text" : "password"}
+                                placeholder="New Password"
+                                className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-[#1e3a5a] outline-none transition-all"
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPass(!showPass)}
+                                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400"
+                            >
+                                {showPass ? <FaEyeSlash size={20} /> : <FaEye size={20} />}
+                            </button>
+                        </div>
+
                         <input
-                            key={idx}
-                            ref={(el) => (inputRefs.current[idx] = el)}
-                            type="text"
-                            maxLength={1}
-                            className={`w-[42px] h-[52px] md:w-[56px] md:h-[64px] border-2 rounded-xl text-center text-[20px] md:text-[24px] font-bold shadow-sm focus:outline-none transition-all disabled:bg-gray-100 disabled:opacity-70 ${isError
-                                    ? 'border-red-500 border-[2px] focus:border-red-500'
-                                    : 'border-gray-200 focus:border-blue-500'
-                                }`}
-                            value={num}
-                            onChange={(e) => handleChange(idx, e.target.value)}
-                            onKeyDown={(e) => handleKeyDown(idx, e)}
-                            inputMode="numeric"
-                            disabled={isExpired}
+                            type="password"
+                            placeholder="Confirm Password"
+                            className="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:border-[#1e3a5a] outline-none transition-all"
+                            value={confirmPassword}
+                            onChange={(e) => setConfirmPassword(e.target.value)}
+                            required
                         />
-                    ))}
-                </div>
+                    </div>
 
-                {/* TIMER */}
-                <div className="mb-8 md:mb-10 text-[16px] md:text-[18px] font-bold text-[#1e3a5a]">
-                    Kodni kiriting:
-                    <span
-                        className="ml-2 font-mono"
-                        style={{ color: isExpired ? '#ef4444' : timeLeft < 60 ? '#f59e0b' : '#1e3a5a' }}
-                    >
-                        {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
-                    </span>
-                </div>
-
-                {/* ACTIONS */}
-                <div className="flex flex-col items-center gap-4">
-                    {isExpired && (
+                    {/* BUTTONS */}
+                    <div className="flex flex-col gap-3 pt-4">
                         <button
-                            onClick={handleRequestNewCode}
-                            className="w-full max-w-[280px] bg-green-500 hover:bg-green-600 text-white py-3 rounded-xl font-bold transition-all shadow-md"
-                        >
-                            Yangi kod so'rash
-                        </button>
-                    )}
-
-                    <div className="flex flex-col sm:flex-row justify-center items-center gap-4 w-full">
-                        <button
-                            onClick={handleSubmit}
+                            type="submit"
                             disabled={loading || isExpired}
-                            className={`w-full sm:w-auto px-12 md:px-16 py-3 rounded-xl font-bold text-[18px] text-white shadow-md transition-all active:scale-95 ${isExpired ? 'bg-gray-400 cursor-not-allowed' : 'bg-[#1e3a5a] hover:bg-[#152c45]'
-                                }`}
+                            className="w-full bg-[#1e3a5a] text-white py-4 rounded-xl font-bold text-lg hover:bg-[#152c45] active:scale-95 transition-all disabled:bg-gray-300"
                         >
-                            {loading ? "Verifying..." : "Next"}
+                            {loading ? "Processing..." : "Update Password"}
                         </button>
-
                         <button
-                            onClick={handleBack}
-                            className="w-full sm:w-auto px-8 py-3 bg-white border-2 border-[#1e3a5a] text-[#1e3a5a] rounded-xl font-semibold hover:bg-[#1e3a5a] hover:text-white transition-all"
+                            type="button"
+                            onClick={() => navigate(-1)}
+                            className="w-full py-3 text-gray-500 font-semibold hover:text-[#1e3a5a] transition-all"
                         >
                             Back
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );
 };
 
-export default ForgotPassword3;
+export default ForgotPasswordCombined;
