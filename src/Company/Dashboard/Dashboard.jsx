@@ -71,7 +71,7 @@ const Dashboard = () => {
 
   const formatData = (jobs, type) => {
     const labels = type === 'week' 
-      ? ['M', 'T', 'W', 'T', 'F', 'ST', 'SN'] 
+      ? ['Mon', 'Tue', 'Wen', 'Thu', 'Fri', 'Sat', 'Sun'] 
       : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
     
     return labels.map((label, index) => ({
