@@ -13,7 +13,6 @@ import SignIn from "./Company/Login/Login.jsx";
 import ForgotPassword1 from "./Company/ForgotPassword1/ForgotPassword1.jsx";
 import ForgotPassword2 from "./Company/ForgotPassword2/ForgotPassword2.jsx";
 import ForgotPassword3 from "./Company/ForgotPassword3/ForgotPassword3.jsx";
-import ForgotPassword4 from "./Company/ForgotPassword4/ForgotPassword4.jsx";
 import Dashboard from "./Company/Dashboard/Dashboard.jsx";
 import TelegramVerify from "./Company/Register/TelegramVerify.jsx";
 import Verify from "./Company/Register/Verify.jsx";
@@ -49,8 +48,6 @@ function App() {
           <Route path="/forgot-password-1" element={<ForgotPassword1 />} />
           <Route path="/forgot-password-2" element={<ForgotPassword2 />} />
           <Route path="/forgot-password-3" element={<ForgotPassword3 />} />
-          <Route path="/forgot-password-4" element={<ForgotPassword4 />} />
-
           {/* Barcha uchun ochiq bo'lishi mumkin bo'lgan sahifalar (ixtiyoriy) */}
           <Route path="/jobs" element={<Jobs />} />
           <Route path="/talents" element={<Talents />} />
