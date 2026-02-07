@@ -130,7 +130,16 @@ const MyCompany = () => {
       imgData.append('profileimg', file);
       const response = await companyApi.update(company?.id || formData?.id, imgData);
       if (response.status === 200 || response.data) {
-        setImagePreview(URL.createObjectURL(file));
+        const newImgUrl = response.data.profileimg_url || URL.createObjectURL(file);
+        setImagePreview(newImgUrl);
+
+        // --- REAL-TIME YANGILASH UCHUN ---
+        const userInfo = JSON.parse(localStorage.getItem('user_info') || '{}');
+        userInfo.profileimg_url = newImgUrl;
+        localStorage.setItem('user_info', JSON.stringify(userInfo));
+        window.dispatchEvent(new Event('userInfoUpdated'));
+        // --------------------------------
+
         toast.update(toastId, { render: "Logo updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
         fetchData();
       }
@@ -146,6 +155,12 @@ const MyCompany = () => {
       const response = await companyApi.update(company?.id || formData?.id, updateData);
       if (response.status === 200 || response.data) {
         setIsModalOpen(false);
+
+        // --- REAL-TIME YANGILASH UCHUN ---
+        localStorage.setItem('user_info', JSON.stringify(formData));
+        window.dispatchEvent(new Event('userInfoUpdated'));
+        // --------------------------------
+
         fetchData();
         toast.update(loadingToast, { render: "Profile updated successfully!", type: "success", isLoading: false, autoClose: 3000 });
       }
@@ -204,7 +219,6 @@ const MyCompany = () => {
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200] flex items-center justify-center p-4">
-          {/* MODALDA SKROLLBAR YASHIRILDI */}
           <div ref={dropdownRef} className="bg-white rounded-[1.5rem] md:rounded-[2.5rem] w-full max-w-2xl max-h-[90vh] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] shadow-2xl relative my-auto">
             <div className="sticky top-0 bg-white p-5 border-b border-gray-50 flex justify-center items-center z-10">
               <h2 className="text-lg md:text-xl font-bold text-gray-700">Edit Company details</h2>
@@ -226,7 +240,6 @@ const MyCompany = () => {
 
               <div className="mt-4 text-left">
                 <label className="block text-gray-500 font-bold mb-2 text-sm ml-1 uppercase tracking-wider text-[10px] md:text-xs">About</label>
-                {/* TEXTAREADA SKROLLBAR YASHIRILDI */}
                 <textarea
                   className="w-full h-[150px] md:h-[180px] border border-gray-200 rounded-2xl p-4 outline-none focus:ring-2 focus:ring-[#5CB85C]/50 focus:border-[#5CB85C] text-sm leading-relaxed resize-none break-all overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
                   placeholder="Describe your company..."
